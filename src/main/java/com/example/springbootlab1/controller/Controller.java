@@ -5,14 +5,11 @@ import com.example.springbootlab1.server.WrongFormatException;
 import com.example.springbootlab1.dao.ResponseGetter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class Controller {
-    @RequestMapping("/sunInfo")
+    @RequestMapping(value = "/sunInfo", method = RequestMethod.GET)
     public String getSunInfo(@RequestParam(value = "lat", defaultValue = "null") String lat,
                                   @RequestParam(value = "lng", defaultValue = "null") String lng,
                                   @RequestParam(value = "date", defaultValue = "null") String date,
@@ -27,7 +24,7 @@ public class Controller {
         return ResponseGetter.gettingFinalResponse(url);
     }
 
-    @RequestMapping("/**")
+    @RequestMapping(value = "/**", method = RequestMethod.GET)
     public ResponseEntity<String> defaultMethod() {
         return new ResponseEntity<>("Please specify a valid path", HttpStatus.BAD_REQUEST);
     }
