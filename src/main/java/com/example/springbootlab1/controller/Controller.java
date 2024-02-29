@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class Controller {
-    @RequestMapping(value = "/sunInfo", method = RequestMethod.GET)
+    @GetMapping(value = "/sunInfo")
     public String getSunInfo(@RequestParam(value = "lat", defaultValue = "null") String lat,
                                   @RequestParam(value = "lng", defaultValue = "null") String lng,
                                   @RequestParam(value = "date", defaultValue = "null") String date,
@@ -24,7 +24,7 @@ public class Controller {
         return ResponseGetter.gettingFinalResponse(url);
     }
 
-    @RequestMapping(value = "/**", method = RequestMethod.GET)
+    @GetMapping(value = "/**")
     public ResponseEntity<String> defaultMethod() {
         return new ResponseEntity<>("Please specify a valid path", HttpStatus.BAD_REQUEST);
     }
