@@ -220,7 +220,6 @@ replay_pid*
 # https://plugins.jetbrains.com/plugin/8053-azure-toolkit-for-intellij
 
 ### Maven ###
-target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -241,7 +240,6 @@ buildNumber.properties
 
 ### IntelliJ IDEA ###
 .idea
-*.iws
 *.iml
 *.ipr
 
