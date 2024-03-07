@@ -8,7 +8,7 @@ public class JsonKeyExtractor {
 
     public static String getFormattedJsonKeys(String jsonResponse){
         Gson json = new Gson();
-        ResultsKey sunrise = json.fromJson(jsonResponse, ResultsKey.class);
-        return "Sunrise " + sunrise.sunriseAndSunsetResults.sunrise + ", sunset " + sunrise.sunriseAndSunsetResults.sunset;
+        SunriseAndSunsetKeys sunrise = json.fromJson(jsonResponse, SunriseAndSunsetKeys.class);
+        return "Sunrise " + sunrise.results.sunrise + ", sunset " + sunrise.results.sunset;
     }
 }
