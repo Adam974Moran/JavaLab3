@@ -3,7 +3,7 @@ package com.example.springbootlab1.controller;
 import com.example.springbootlab1.service.JsonKeyExtractor;
 import com.example.springbootlab1.service.UrlGenerator;
 import com.example.springbootlab1.service.WrongFormatException;
-import com.example.springbootlab1.data.SunriseAndSunset;
+import com.example.springbootlab1.data.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ public class SunriseAndSunsetController {
             return w.getExceptionMessage();
         }
 
-        return JsonKeyExtractor.getFormattedJsonKeys(SunriseAndSunset.getJsonInString(url));
+        return JsonKeyExtractor.getFormattedJsonKeys(APIResponse.getJsonInString(url));
     }
 
 
