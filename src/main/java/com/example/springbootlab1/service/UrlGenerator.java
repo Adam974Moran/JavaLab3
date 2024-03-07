@@ -1,10 +1,10 @@
-package com.example.springbootlab1.server;
+package com.example.springbootlab1.service;
 
 import java.util.Objects;
 
-public class UrlChecker {
-    private UrlChecker(){}
-    public static String checkUrl(String lat, String lng, String date, String formatted) throws WrongFormatException{
+public class UrlGenerator {
+    private UrlGenerator(){}
+    public static String generateNewUrl(String lat, String lng, String date, String formatted) throws WrongFormatException{
         if(Objects.equals(lat, "null") || Objects.equals(lng, "null")){
             throw new WrongFormatException("Wrong format! Variables \"lat\" and \"lng\" are obligatory!");
         }

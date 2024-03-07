@@ -1,4 +1,4 @@
-package com.example.springbootlab1.server;
+package com.example.springbootlab1.service;
 
 public class WrongFormatException extends Exception{
     private final String exceptionMessage;
