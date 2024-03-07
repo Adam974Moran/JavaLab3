@@ -1,6 +1,6 @@
 package com.example.springbootlab1.service;
 
-public class SunriseAndSunsetResults {
+public class SunriseAndSunsetKeys {
     String sunrise;
     String sunset;
 }
