@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" charset="text/html; UTF-8">
+    <title>User Requests</title>
+</head>
+<body>
+    <div>
+        <h1>User Requests</h1>
+        <div th:each="el : ${posts}" class="alert alert-info mt-2">
+            <h3 th:text="${el.userId}"></h3>
+            <p th:text="${el.lat}"></p>
+            <a th:href="'/blog/' + ${el.id}">Детальнее</a>
+        </div>
+    </div>
+</body>
+</html>
