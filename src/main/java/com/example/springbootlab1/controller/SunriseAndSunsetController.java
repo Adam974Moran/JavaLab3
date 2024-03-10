@@ -1,12 +1,17 @@
 package com.example.springbootlab1.controller;
 
+import com.example.springbootlab1.repository.CountryRepository;
 import com.example.springbootlab1.service.JsonKeyExtractor;
+import com.example.springbootlab1.repository.Country;
 import com.example.springbootlab1.service.UrlGenerator;
 import com.example.springbootlab1.service.WrongFormatException;
 import com.example.springbootlab1.data.APIResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class SunriseAndSunsetController {
@@ -25,6 +30,15 @@ public class SunriseAndSunsetController {
 
         return JsonKeyExtractor.getFormattedJsonKeys(APIResponse.getJsonInString(url));
     }
+
+    @Autowired
+    private CountryRepository countryRepository;
+
+    @GetMapping("/")
+    public List<Country> userRequests(){
+        return countryRepository.findAll();
+    }
+
 
 
     @GetMapping(value = "/**")

@@ -1,29 +1,16 @@
-package com.example.springbootlab1.service;
+package com.example.springbootlab1.repository;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity
-public class Post {
+public class Coordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String userId;
-
-    private String cityName;
     private String lat;
     private String lng;
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public Long getId() {
         return id;
@@ -31,14 +18,6 @@ public class Post {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getCityName() {
-        return cityName;
-    }
-
-    public void setCityName(String cityName) {
-        this.cityName = cityName;
     }
 
     public String getLat() {
