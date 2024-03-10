@@ -19,6 +19,7 @@ import java.util.Objects;
 
 @RestController
 public class SunriseAndSunsetController {
+    public static final String ERROR_MESSAGE_1 = "Please specify a valid path";
 
     @Autowired
     private CountryRepository countryRepository;
@@ -43,7 +44,7 @@ public class SunriseAndSunsetController {
     }
 
     @PostMapping("/sunInfo/country/{countryName}")
-    public ResponseEntity<?> addCountry(@PathVariable String countryName){
+    public ResponseEntity<Country> addCountry(@PathVariable String countryName){
         Country country = countryRepository.findByCountryName(countryName);
         if(country == null){
             country = new Country();
@@ -51,11 +52,11 @@ public class SunriseAndSunsetController {
             countryRepository.save(country);
             return new ResponseEntity<>(country, HttpStatus.CREATED);
         }
-        return new ResponseEntity<>("This country is already exists!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/sunInfo/country/{countryName}/coordinates")
-    public ResponseEntity<?> addCoordinates(@PathVariable String countryName,
+    public ResponseEntity<Coordinates> addCoordinates(@PathVariable String countryName,
                                                       @RequestParam(value = "lat", defaultValue = "null") String lat,
                                                       @RequestParam(value = "lng", defaultValue = "null") String lng){
         Country country = countryRepository.findByCountryName(countryName);
@@ -65,7 +66,7 @@ public class SunriseAndSunsetController {
             countryRepository.save(country);
         }
         if(Objects.equals(lng, "null") || Objects.equals(lat, "null")){
-            return new ResponseEntity<>("Wrong parameters!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Coordinates coordinates = new Coordinates();
         coordinates.setLat(lat);
@@ -130,9 +131,19 @@ public class SunriseAndSunsetController {
         return "No coordinates with such id!";
     }
 
-    @RequestMapping(value = "/**")
-    public ResponseEntity<String> defaultMethod() {
-        return new ResponseEntity<>("Please specify a valid path", HttpStatus.BAD_REQUEST);
+    @GetMapping(value = "/**")
+    public ResponseEntity<String> defaultGetMethod() {
+        return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping(value = "/**")
+    public ResponseEntity<String> defaultPostMethod() {
+        return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
+    }
+
+    @DeleteMapping(value = "/**")
+    public ResponseEntity<String> defaultDeleteMethod() {
+        return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
