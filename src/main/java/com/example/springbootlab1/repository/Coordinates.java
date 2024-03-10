@@ -1,12 +1,13 @@
 package com.example.springbootlab1.repository;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+import java.util.Objects;
+
+@Entity
 public class Coordinates {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String lat;
@@ -34,5 +35,21 @@ public class Coordinates {
 
     public void setLng(String lng) {
         this.lng = lng;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "country_id")
+    private Country country;
+
+    public void setCountry(Country country){
+        this.country = country;
+    }
+
+    public Country getCountry(Country country){
+        return country;
+    }
+
+    public boolean checkId(Long id){
+        return Objects.equals(this.id, id);
     }
 }
