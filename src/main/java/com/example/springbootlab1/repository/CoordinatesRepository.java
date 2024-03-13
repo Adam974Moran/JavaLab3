@@ -5,4 +5,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CoordinatesRepository extends JpaRepository<Coordinates, Long> {
+    Coordinates getCoordinatesByLngAndLat(String lat, String lng);
+    Coordinates findCoordinatesById(Long id);
 }

@@ -1,18 +1,15 @@
 package com.example.springbootlab1.controller;
 
 import com.example.springbootlab1.repository.Coordinates;
-import com.example.springbootlab1.repository.CoordinatesRepository;
-import com.example.springbootlab1.repository.CountryRepository;
-import com.example.springbootlab1.service.JsonKeyExtractor;
+import com.example.springbootlab1.repository.Date;
+import com.example.springbootlab1.service.*;
 import com.example.springbootlab1.repository.Country;
-import com.example.springbootlab1.service.UrlGenerator;
-import com.example.springbootlab1.service.WrongFormatException;
 import com.example.springbootlab1.data.APIResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,13 +17,50 @@ import java.util.Objects;
 @RestController
 public class SunriseAndSunsetController {
     public static final String ERROR_MESSAGE_1 = "Please specify a valid path";
+    public static final String ERROR_MESSAGE_2 = "No such country!";
 
-    @Autowired
-    private CountryRepository countryRepository;
+    private final CountryRepositoryService countryRepositoryService;
+    private final CoordinatesRepositoryService coordinatesRepositoryService;
+    private final DateRepositoryService dateRepositoryService;
 
-    @Autowired
-    private CoordinatesRepository coordinatesRepository;
+    public SunriseAndSunsetController(CountryRepositoryService countryRepositoryService,
+                                      CoordinatesRepositoryService coordinatesRepositoryService,
+                                      DateRepositoryService dateRepositoryService){
+        this.countryRepositoryService = countryRepositoryService;
+        this.coordinatesRepositoryService = coordinatesRepositoryService;
+        this.dateRepositoryService = dateRepositoryService;
+    }
 
+
+    //CREATE
+    @PostMapping("/sunInfo/country/{countryName}/coordinates")
+    public ResponseEntity<Coordinates> addCoordinates(@PathVariable String countryName,
+                                                      @RequestParam(value = "lat", defaultValue = "null") String lat,
+                                                      @RequestParam(value = "lng", defaultValue = "null") String lng){
+        Country country = countryRepositoryService.findByCountryName(countryName);
+        if(country == null){
+            country = new Country();
+            country.setCountryName(countryName);
+            countryRepositoryService.save(country);
+        }
+        if(Objects.equals(lng, "null") || Objects.equals(lat, "null")){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Coordinates coordinates = new Coordinates();
+        coordinates.setLat(lat);
+        coordinates.setLng(lng);
+        coordinates.setCountry(country);
+        coordinatesRepositoryService.save(coordinates);
+        return new ResponseEntity<>(coordinates, HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/**")
+    public ResponseEntity<String> defaultPostMethod() {
+        return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
+    }
+
+
+    //READ
     @GetMapping("/sunInfo")
     public String getSunriseAndSunsetInfo(@RequestParam(value = "lat", defaultValue = "null") String lat,
                                           @RequestParam(value = "lng", defaultValue = "null") String lng,
@@ -40,50 +74,57 @@ public class SunriseAndSunsetController {
             return w.getExceptionMessage();
         }
 
+        //"CREATING" DATE AND COORDINATES
+        if(Objects.equals(date, "null")){
+            date = LocalDate.now().toString();
+        }
+        Coordinates coordinates = coordinatesRepositoryService.getCoordinatesByLngAndLat(lat, lng); //Ищем коорд. в репозитории
+        Date coordinatesDate = dateRepositoryService.findByDate(date); //Ищем дату в репозитории
+        if(Objects.equals(coordinates, null)){ //Если координаты не существует
+            coordinates = new Coordinates();
+            coordinates.setLat(lat);
+            coordinates.setLng(lng);
+
+            //Проверяем нужно ли дополнительно сохранять и дату
+            if(Objects.equals(coordinatesDate, null)){
+                coordinatesDate = new Date();
+                coordinatesDate.setCoordinatesDate(date);
+            }
+            coordinatesDate.getCoordinates().add(coordinates);
+            coordinates.getDate().add(coordinatesDate);
+            dateRepositoryService.save(coordinatesDate);
+            coordinatesRepositoryService.save(coordinates);
+        }
+        else if(!Objects.equals(coordinatesDate, null) && !coordinates.getDates().contains(coordinatesDate)) {
+            //Координата существует и существует дата, то мы проверяем привязвны ли эти данные к друг гругу
+            coordinatesDate.getCoordinates().add(coordinates);
+            coordinates.getDate().add(coordinatesDate);
+            dateRepositoryService.save(coordinatesDate);
+            coordinatesRepositoryService.save(coordinates);
+        }
+        else if(Objects.equals(coordinatesDate, null)){
+            coordinatesDate = new Date();
+            coordinatesDate.setCoordinatesDate(date);
+            coordinatesDate.getCoordinates().add(coordinates);
+            coordinates.getDate().add(coordinatesDate);
+            dateRepositoryService.save(coordinatesDate);
+            coordinatesRepositoryService.save(coordinates);
+        }
+
         return JsonKeyExtractor.getFormattedJsonKeys(APIResponse.getJsonInString(url));
     }
 
-    @PostMapping("/sunInfo/country/{countryName}")
-    public ResponseEntity<Country> addCountry(@PathVariable String countryName){
-        Country country = countryRepository.findByCountryName(countryName);
-        if(country == null){
-            country = new Country();
-            country.setCountryName(countryName);
-            countryRepository.save(country);
-            return new ResponseEntity<>(country, HttpStatus.CREATED);
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-
-    @PostMapping("/sunInfo/country/{countryName}/coordinates")
-    public ResponseEntity<Coordinates> addCoordinates(@PathVariable String countryName,
-                                                      @RequestParam(value = "lat", defaultValue = "null") String lat,
-                                                      @RequestParam(value = "lng", defaultValue = "null") String lng){
-        Country country = countryRepository.findByCountryName(countryName);
-        if(country == null){
-            country = new Country();
-            country.setCountryName(countryName);
-            countryRepository.save(country);
-        }
-        if(Objects.equals(lng, "null") || Objects.equals(lat, "null")){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        Coordinates coordinates = new Coordinates();
-        coordinates.setLat(lat);
-        coordinates.setLng(lng);
-        coordinates.setCountry(country);
-        coordinatesRepository.save(coordinates);
-        return new ResponseEntity<>(coordinates, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/sunInfo/country/{countryName}/coordinates")
+    @GetMapping("/sunInfo/country/{countryName}")
     public String getCoordinatesByCountry(@PathVariable String countryName,
                                           @RequestParam(value = "date", defaultValue = "null") String date){
+
         StringBuilder results = new StringBuilder("Results:\n");
-        Country country = countryRepository.findByCountryName(countryName);
+        Country country = countryRepositoryService.findByCountryName(countryName);
         if(country == null){
-            return "No such country!";
+            return ERROR_MESSAGE_2;
         }
+        results.append(country.getCountryName());
+
         List<Coordinates> coordinatesList = new ArrayList<>(country.getCoordinates());
         for(Coordinates coordinate : coordinatesList){
             String url;
@@ -98,47 +139,119 @@ public class SunriseAndSunsetController {
         return results.toString();
     }
 
-    @GetMapping("/sunInfo/")
-    public List<Country> userRequests(){
-        return countryRepository.findAll();
+    @GetMapping("/history")
+    public List<Date> showHistory(){
+        return dateRepositoryService.findAll();
     }
 
-    @DeleteMapping("/sunInfo/country/{countryName}")
-    public String deleteCoordinates(@PathVariable String countryName){
-        Country country = countryRepository.findByCountryName(countryName);
-        if(country == null){
-            return "There is no such country!";
-        }
-        List<Coordinates> coordinates = new ArrayList<>(country.getCoordinates());
-        coordinatesRepository.deleteAll(coordinates);
-        countryRepository.delete(country);
-        return "Deleted successfully!";
+    @GetMapping("/allCountriesInfo")
+    public List<Country> getCountriesInfo(){
+        return countryRepositoryService.findAll();
     }
 
-    @DeleteMapping("/sunInfo/country/{countryName}/coordinates/{coordinatesId}")
-    public String deleteCoordinates(@PathVariable String countryName, @PathVariable Long coordinatesId){
-        Country country = countryRepository.findByCountryName(countryName);
-        if(country == null){
-            return "There is no such country!";
-        }
-        List<Coordinates> coordinates = new ArrayList<>(country.getCoordinates());
-        for (Coordinates coordinate : coordinates){
-            if(coordinate.checkId(coordinatesId)){
-                coordinatesRepository.deleteById(coordinatesId);
-                return "Deleted successfully!";
-            }
-        }
-        return "No coordinates with such id!";
-    }
+    @GetMapping("/historyByDate")
+    public List<Date> getHistoryByDate() { return dateRepositoryService.findAll(); }
+
+    @GetMapping("/historyByCoordinates")
+    public List<Coordinates> getHistoryByCoordinates() { return coordinatesRepositoryService.findAll(); }
 
     @GetMapping(value = "/**")
     public ResponseEntity<String> defaultGetMethod() {
         return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping(value = "/**")
-    public ResponseEntity<String> defaultPostMethod() {
-        return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
+
+    //PUT
+    @PutMapping("/country/{countryName}/{newCountryName}")
+    public String updateCountryName(@PathVariable String countryName, @PathVariable String newCountryName){
+        Country country = countryRepositoryService.findByCountryName(countryName);
+        if(Objects.equals(country, null)){
+            return ERROR_MESSAGE_2;
+        }
+        else{
+            country.setCountryName(newCountryName);
+            countryRepositoryService.save(country);
+            return "Country name updated successfully!";
+        }
+    }
+
+    @PutMapping("/coordinates/{coordinatesId}")
+    public String updateCountryName(@PathVariable Long coordinatesId,
+                                    @RequestParam(value = "lat", defaultValue = "null") String lat,
+                                    @RequestParam(value = "lng", defaultValue = "null") String lng){
+        Coordinates coordinates = coordinatesRepositoryService.findCoordinatesById(coordinatesId);
+        if(Objects.equals(coordinates, null) || Objects.equals(lat, null) || Objects.equals(lng, null)){
+            return ERROR_MESSAGE_2;
+        }
+        else{
+            coordinates.setLat(lat);
+            coordinates.setLng(lng);
+            coordinatesRepositoryService.save(coordinates);
+            return "Coordinates updated successfully!";
+        }
+    }
+
+    @PutMapping("/date/{dateId}/{newDateValue}")
+    public String updateDateValue(@PathVariable Long dateId, @PathVariable String newDateValue){
+        Date dateToUpdate = dateRepositoryService.findDateById(dateId);
+        if(Objects.equals(dateToUpdate, null)){
+            return "No such date to change!";
+        }
+        else{
+            dateToUpdate.setCoordinatesDate(newDateValue);
+            dateRepositoryService.save(dateToUpdate);
+            return "Country name updated successfully!";
+        }
+    }
+
+
+    //DELETE
+    @DeleteMapping("/sunInfo/country/{countryName}")
+    public String deleteCoordinates(@PathVariable String countryName){
+        Country country = countryRepositoryService.findByCountryName(countryName);
+        if(country == null){
+            return "There is no such country!";
+        }
+        List<Coordinates> coordinates = new ArrayList<>(country.getCoordinates());
+        coordinatesRepositoryService.deleteAll(coordinates);
+        countryRepositoryService.delete(country);
+        return "Deleted successfully!";
+    }
+
+    @DeleteMapping("/sunInfo/country/{countryName}/coordinates/{coordinatesId}")
+    public String deleteCoordinates(@PathVariable String countryName, @PathVariable Long coordinatesId){
+        Country country = countryRepositoryService.findByCountryName(countryName);
+        if(country == null){
+            return "There is no such country!";
+        }
+        List<Coordinates> coordinates = new ArrayList<>(country.getCoordinates());
+        for (Coordinates coordinate : coordinates){
+            if(coordinate.checkId(coordinatesId)){
+                coordinatesRepositoryService.deleteById(coordinatesId);
+                return "Deleted successfully!";
+            }
+        }
+        return "No coordinates with such id!";
+    }
+
+    @DeleteMapping("/history/date/{dateId}")
+    public String deleteDate(@PathVariable Long dateId){
+        Date removableDate = dateRepositoryService.findDateById(dateId);
+        if(Objects.equals(removableDate, null)){
+            return "No such date id!";
+        }
+        List<Coordinates> coordinates = new ArrayList<>(removableDate.getCoordinates());
+        for (Coordinates coordinate : coordinates){
+            if(coordinate.getDates().size() == 1 && Objects.equals(coordinate.getCountry(), null)){
+                coordinatesRepositoryService.deleteById(coordinate.getId());
+            }
+            else{
+                removableDate.getCoordinates().remove(coordinate);
+                coordinate.getDate().remove(removableDate);
+            }
+        }
+        dateRepositoryService.deleteById(removableDate.getId());
+        return "Deleted successfully";
     }
 
     @DeleteMapping(value = "/**")
@@ -146,8 +259,8 @@ public class SunriseAndSunsetController {
         return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException() {
-        return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<Object> handleException() {
+//        return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 }

@@ -33,8 +33,4 @@ public class Country {
     public Set<Coordinates> getCoordinates(){
         return coordinates;
     }
-
-    public void setCoordinates(Set<Coordinates> coordinates){
-        this.coordinates = coordinates;
-    }
 }

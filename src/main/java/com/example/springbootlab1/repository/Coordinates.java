@@ -3,6 +3,7 @@ package com.example.springbootlab1.repository;
 import jakarta.persistence.*;
 
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 public class Coordinates {
@@ -41,13 +42,25 @@ public class Coordinates {
     @JoinColumn(name = "country_id")
     private Country country;
 
+    @ManyToMany(mappedBy = "coordinates")
+    private Set<Date> date;
+
+    public Country getCountry() {
+        return country;
+    }
+
+    public Set<Date> getDate() {
+        return date;
+    }
+
+    public Set<Date> getDates(){
+        return date;
+    }
+
     public void setCountry(Country country){
         this.country = country;
     }
 
-    public Country getCountry(Country country){
-        return country;
-    }
 
     public boolean checkId(Long id){
         return Objects.equals(this.id, id);
