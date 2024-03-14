@@ -147,9 +147,6 @@ public class SunriseAndSunsetController {
     }
 
     @GetMapping("/allCountriesInfo")
-//    public List<Country> getCountriesInfo(){
-//        return countryRepositoryService.findAll();
-//    }
     public StringBuilder getAllCountriesInfo() {
         StringBuilder result = new StringBuilder("Countries info:\n\n");
         List<Country> countryList = countryRepositoryService.findAll();
