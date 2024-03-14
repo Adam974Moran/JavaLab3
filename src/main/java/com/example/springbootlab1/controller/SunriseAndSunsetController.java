@@ -100,13 +100,13 @@ public class SunriseAndSunsetController {
             }
             coordinatesDate.getCoordinates().add(coordinates);
             dateRepositoryService.save(coordinatesDate);
-            coordinates.getDate().add(coordinatesDate);
+            coordinates.getDates().add(coordinatesDate);
         }
         else if(!Objects.equals(coordinatesDate, null) && !coordinates.getDates().contains(coordinatesDate)) {
             //Координата существует и существует дата, то мы проверяем привязвны ли эти данные к друг гругу
             coordinatesDate.getCoordinates().add(coordinates);
             dateRepositoryService.save(coordinatesDate);
-            coordinates.getDate().add(coordinatesDate);
+            coordinates.getDates().add(coordinatesDate);
             coordinatesRepositoryService.save(coordinates);
         }
         else if(Objects.equals(coordinatesDate, null)){
@@ -114,7 +114,7 @@ public class SunriseAndSunsetController {
             coordinatesDate.setCoordinatesDate(date);
             coordinatesDate.getCoordinates().add(coordinates);
             dateRepositoryService.save(coordinatesDate);
-            coordinates.getDate().add(coordinatesDate);
+            coordinates.getDates().add(coordinatesDate);
             coordinatesRepositoryService.save(coordinates);
         }
 
@@ -170,7 +170,7 @@ public class SunriseAndSunsetController {
         StringBuilder result = new StringBuilder("History(coordinates):\n\n");
         List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
         for (Coordinates coordinates : coordinatesList){
-            Set<Date> dateSet = coordinates.getDate();
+            Set<Date> dateSet = coordinates.getDates();
             if(Objects.equals(dateSet.size(), 0)){
                 continue;
             }
@@ -271,13 +271,13 @@ public class SunriseAndSunsetController {
         for (Coordinates coordinate : coordinates){
             if(coordinate.getDates().size() == 1 && Objects.equals(coordinate.getCountry(), null)){
                 removableDate.getCoordinates().remove(coordinate);
-                coordinate.getDate().remove(removableDate);
+                coordinate.getDates().remove(removableDate);
                 dateRepositoryService.save(removableDate);
                 coordinatesRepositoryService.deleteById(coordinate.getId());
             }
             else{
                 removableDate.getCoordinates().remove(coordinate);
-                coordinate.getDate().remove(removableDate);
+                coordinate.getDates().remove(removableDate);
                 dateRepositoryService.save(removableDate);
             }
         }
@@ -291,16 +291,16 @@ public class SunriseAndSunsetController {
         if(Objects.equals(removableCoordinates, null)){
             return "No such date id!";
         }
-        List<Date> dateList = new ArrayList<>(removableCoordinates.getDate());
+        List<Date> dateList = new ArrayList<>(removableCoordinates.getDates());
         for (Date date : dateList){
             if(date.getCoordinates().size() == 1){
-                removableCoordinates.getDate().remove(date);
+                removableCoordinates.getDates().remove(date);
                 date.getCoordinates().remove(removableCoordinates);
                 coordinatesRepositoryService.save(removableCoordinates);
                 dateRepositoryService.deleteById(date.getId());
             }
             else{
-                removableCoordinates.getDate().remove(date);
+                removableCoordinates.getDates().remove(date);
                 date.getCoordinates().remove(removableCoordinates);
                 coordinatesRepositoryService.save(removableCoordinates);
             }

@@ -54,10 +54,6 @@ public class Coordinates {
         return country;
     }
 
-    public Set<Date> getDate() {
-        return date;
-    }
-
     public Set<Date> getDates(){
         return date;
     }
