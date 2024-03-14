@@ -125,12 +125,12 @@ public class SunriseAndSunsetController {
     public String getCoordinatesByCountry(@PathVariable String countryName,
                                           @RequestParam(value = "date", defaultValue = "null") String date){
 
-        StringBuilder results = new StringBuilder("Results:\n");
+        StringBuilder results = new StringBuilder("Results(");
         Country country = countryRepositoryService.findByCountryName(countryName);
         if(country == null){
             return ERROR_MESSAGE_2;
         }
-        results.append(country.getCountryName());
+        results.append(country.getCountryName()).append("):\n");
 
         List<Coordinates> coordinatesList = new ArrayList<>(country.getCoordinates());
         for(Coordinates coordinate : coordinatesList){
@@ -147,8 +147,20 @@ public class SunriseAndSunsetController {
     }
 
     @GetMapping("/allCountriesInfo")
-    public List<Country> getCountriesInfo(){
-        return countryRepositoryService.findAll();
+//    public List<Country> getCountriesInfo(){
+//        return countryRepositoryService.findAll();
+//    }
+    public StringBuilder getAllCountriesInfo() {
+        StringBuilder result = new StringBuilder("Countries info:\n\n");
+        List<Country> countryList = countryRepositoryService.findAll();
+        for (Country country : countryList){
+            result.append("\tcountry_id = ").append(country.getId()).append(", name = ").append(country.getCountryName()).append(":\n");
+            Set<Coordinates> coordinatesSet = country.getCoordinates();
+            for (Coordinates coordinates : coordinatesSet){
+                result.append("\t\tcoordinates_id = ").append(coordinates.getId()).append(", lat(").append(coordinates.getLat()).append("), lng(").append(coordinates.getLng()).append(")\n");
+            }
+        }
+        return result;
     }
 
     @GetMapping("/historyByDate")
@@ -192,8 +204,9 @@ public class SunriseAndSunsetController {
     @PutMapping("/country/{countryName}/{newCountryName}")
     public String updateCountryName(@PathVariable String countryName, @PathVariable String newCountryName){
         Country country = countryRepositoryService.findByCountryName(countryName);
-        if(Objects.equals(country, null)){
-            return ERROR_MESSAGE_2;
+        Country countryCheck = countryRepositoryService.findByCountryName(newCountryName);
+        if(Objects.equals(country, null) || !Objects.equals(countryCheck, null)){
+            return "Error in changing country name!";
         }
         else{
             country.setCountryName(newCountryName);
@@ -221,8 +234,9 @@ public class SunriseAndSunsetController {
     @PutMapping("/date/{dateId}/{newDateValue}")
     public String updateDateValue(@PathVariable Long dateId, @PathVariable String newDateValue){
         Date dateToUpdate = dateRepositoryService.findDateById(dateId);
-        if(Objects.equals(dateToUpdate, null)){
-            return "No such date to change!";
+        Date dateToCheck = dateRepositoryService.findByDate(newDateValue);
+        if(Objects.equals(dateToUpdate, null) || !Objects.equals(dateToCheck, null)){
+            return "Error in changing date!";
         }
         else{
             dateToUpdate.setCoordinatesDate(newDateValue);
