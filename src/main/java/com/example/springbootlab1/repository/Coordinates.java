@@ -2,6 +2,7 @@ package com.example.springbootlab1.repository;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -44,6 +45,10 @@ public class Coordinates {
 
     @ManyToMany(mappedBy = "coordinates")
     private Set<Date> date;
+
+    public Coordinates(){
+        date = new HashSet<>();
+    }
 
     public Country getCountry() {
         return country;

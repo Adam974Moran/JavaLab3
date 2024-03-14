@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @RestController
 public class SunriseAndSunsetController {
@@ -75,15 +76,22 @@ public class SunriseAndSunsetController {
         }
 
         //"CREATING" DATE AND COORDINATES
-        if(Objects.equals(date, "null")){
+        if(Objects.equals(date, "null") || Objects.equals(date, "today")){
             date = LocalDate.now().toString();
         }
-        Coordinates coordinates = coordinatesRepositoryService.getCoordinatesByLngAndLat(lat, lng); //Ищем коорд. в репозитории
+        Coordinates coordinates = null;
+        List<Coordinates> coordinatesToCheck = coordinatesRepositoryService.findAll();
+        for(Coordinates coordinate : coordinatesToCheck){
+            if(Objects.equals(coordinate.getLat(), lat) && Objects.equals(coordinate.getLng(), lng)){
+                coordinates = coordinate;
+            }
+        }
         Date coordinatesDate = dateRepositoryService.findByDate(date); //Ищем дату в репозитории
         if(Objects.equals(coordinates, null)){ //Если координаты не существует
             coordinates = new Coordinates();
             coordinates.setLat(lat);
             coordinates.setLng(lng);
+            coordinatesRepositoryService.save(coordinates);
 
             //Проверяем нужно ли дополнительно сохранять и дату
             if(Objects.equals(coordinatesDate, null)){
@@ -91,23 +99,22 @@ public class SunriseAndSunsetController {
                 coordinatesDate.setCoordinatesDate(date);
             }
             coordinatesDate.getCoordinates().add(coordinates);
-            coordinates.getDate().add(coordinatesDate);
             dateRepositoryService.save(coordinatesDate);
-            coordinatesRepositoryService.save(coordinates);
+            coordinates.getDate().add(coordinatesDate);
         }
         else if(!Objects.equals(coordinatesDate, null) && !coordinates.getDates().contains(coordinatesDate)) {
             //Координата существует и существует дата, то мы проверяем привязвны ли эти данные к друг гругу
             coordinatesDate.getCoordinates().add(coordinates);
-            coordinates.getDate().add(coordinatesDate);
             dateRepositoryService.save(coordinatesDate);
+            coordinates.getDate().add(coordinatesDate);
             coordinatesRepositoryService.save(coordinates);
         }
         else if(Objects.equals(coordinatesDate, null)){
             coordinatesDate = new Date();
             coordinatesDate.setCoordinatesDate(date);
             coordinatesDate.getCoordinates().add(coordinates);
-            coordinates.getDate().add(coordinatesDate);
             dateRepositoryService.save(coordinatesDate);
+            coordinates.getDate().add(coordinatesDate);
             coordinatesRepositoryService.save(coordinates);
         }
 
@@ -139,21 +146,41 @@ public class SunriseAndSunsetController {
         return results.toString();
     }
 
-    @GetMapping("/history")
-    public List<Date> showHistory(){
-        return dateRepositoryService.findAll();
-    }
-
     @GetMapping("/allCountriesInfo")
     public List<Country> getCountriesInfo(){
         return countryRepositoryService.findAll();
     }
 
     @GetMapping("/historyByDate")
-    public List<Date> getHistoryByDate() { return dateRepositoryService.findAll(); }
+    public StringBuilder getHistoryByDate() {
+        StringBuilder result = new StringBuilder("History(date):\n\n");
+        List<Date> datesList = dateRepositoryService.findAll();
+        for (Date date : datesList){
+            result.append("\tdate_id = ").append(date.getId()).append(", date = ").append(date.getCoordinatesDate()).append(":\n");
+            Set<Coordinates> coordinatesSet = date.getCoordinates();
+            for (Coordinates coordinates : coordinatesSet){
+                result.append("\t\tcoordinates_id = ").append(coordinates.getId()).append(", lat = ").append(coordinates.getLat()).append(", lng = ").append(coordinates.getLng()).append("\n");
+            }
+        }
+        return result;
+    }
 
     @GetMapping("/historyByCoordinates")
-    public List<Coordinates> getHistoryByCoordinates() { return coordinatesRepositoryService.findAll(); }
+    public StringBuilder getHistoryByCoordinates() {
+        StringBuilder result = new StringBuilder("History(coordinates):\n\n");
+        List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
+        for (Coordinates coordinates : coordinatesList){
+            Set<Date> dateSet = coordinates.getDate();
+            if(Objects.equals(dateSet.size(), 0)){
+                continue;
+            }
+            result.append("\tcoordinates_id = ").append(coordinates.getId()).append(", lat = ").append(coordinates.getLat()).append(", lng = ").append(coordinates.getLng()).append("\n");
+            for (Date date : dateSet){
+                result.append("\t\tdate_id = ").append(date.getId()).append(", date = ").append(date.getCoordinatesDate()).append(":\n");
+            }
+        }
+        return result;
+    }
 
     @GetMapping(value = "/**")
     public ResponseEntity<String> defaultGetMethod() {
@@ -180,8 +207,8 @@ public class SunriseAndSunsetController {
                                     @RequestParam(value = "lat", defaultValue = "null") String lat,
                                     @RequestParam(value = "lng", defaultValue = "null") String lng){
         Coordinates coordinates = coordinatesRepositoryService.findCoordinatesById(coordinatesId);
-        if(Objects.equals(coordinates, null) || Objects.equals(lat, null) || Objects.equals(lng, null)){
-            return ERROR_MESSAGE_2;
+        if(Objects.equals(coordinates, null) || Objects.equals(lat, "null") || Objects.equals(lng, "null")){
+            return "Nonexistent coordinates or wrong parameters!";
         }
         else{
             coordinates.setLat(lat);
@@ -235,7 +262,7 @@ public class SunriseAndSunsetController {
     }
 
     @DeleteMapping("/history/date/{dateId}")
-    public String deleteDate(@PathVariable Long dateId){
+    public String deleteByDate(@PathVariable Long dateId){
         Date removableDate = dateRepositoryService.findDateById(dateId);
         if(Objects.equals(removableDate, null)){
             return "No such date id!";
@@ -243,14 +270,42 @@ public class SunriseAndSunsetController {
         List<Coordinates> coordinates = new ArrayList<>(removableDate.getCoordinates());
         for (Coordinates coordinate : coordinates){
             if(coordinate.getDates().size() == 1 && Objects.equals(coordinate.getCountry(), null)){
+                removableDate.getCoordinates().remove(coordinate);
+                coordinate.getDate().remove(removableDate);
+                dateRepositoryService.save(removableDate);
                 coordinatesRepositoryService.deleteById(coordinate.getId());
             }
             else{
                 removableDate.getCoordinates().remove(coordinate);
                 coordinate.getDate().remove(removableDate);
+                dateRepositoryService.save(removableDate);
             }
         }
         dateRepositoryService.deleteById(removableDate.getId());
+        return "Deleted successfully";
+    }
+
+    @DeleteMapping("/history/coordinates/{coordinatesId}")
+    public String deleteByCoordinates(@PathVariable Long coordinatesId){
+        Coordinates removableCoordinates = coordinatesRepositoryService.findCoordinatesById(coordinatesId);
+        if(Objects.equals(removableCoordinates, null)){
+            return "No such date id!";
+        }
+        List<Date> dateList = new ArrayList<>(removableCoordinates.getDate());
+        for (Date date : dateList){
+            if(date.getCoordinates().size() == 1){
+                removableCoordinates.getDate().remove(date);
+                date.getCoordinates().remove(removableCoordinates);
+                coordinatesRepositoryService.save(removableCoordinates);
+                dateRepositoryService.deleteById(date.getId());
+            }
+            else{
+                removableCoordinates.getDate().remove(date);
+                date.getCoordinates().remove(removableCoordinates);
+                coordinatesRepositoryService.save(removableCoordinates);
+            }
+        }
+        coordinatesRepositoryService.deleteById(removableCoordinates.getId());
         return "Deleted successfully";
     }
 
@@ -259,8 +314,8 @@ public class SunriseAndSunsetController {
         return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<Object> handleException() {
-//        return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleException() {
+        return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

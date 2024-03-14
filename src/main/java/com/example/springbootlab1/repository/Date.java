@@ -2,6 +2,7 @@ package com.example.springbootlab1.repository;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -32,6 +33,10 @@ public class Date {
             joinColumns = @JoinColumn(name = "date_id"),
             inverseJoinColumns = @JoinColumn(name = "coordinates_id"))
     private Set<Coordinates> coordinates;
+
+    public Date(){
+        coordinates = new HashSet<>();
+    }
 
     public Set<Coordinates> getCoordinates() {
         return coordinates;
