@@ -15,13 +15,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class CacheConfiguration {
     @Bean
-    public CacheManager cacheManager(){
+    public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager("sunInfoCache");
     }
 
     @CacheEvict(cacheNames = "sunInfoCache", allEntries = true)
     @Scheduled(fixedRate = 600000) //10 минут ожидания
-    public void clearCache(){
+    public void clearCache() {
         //Метод пустой так как для аннотации @CacheEvict,
         //которая просто очищает кеш, аннотация не нужна
     }
