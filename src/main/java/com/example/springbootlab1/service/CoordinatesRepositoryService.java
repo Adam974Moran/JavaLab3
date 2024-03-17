@@ -1,6 +1,8 @@
 package com.example.springbootlab1.service;
 
 import com.example.springbootlab1.repository.Coordinates;
+import com.example.springbootlab1.repository.Date;
+
 import java.util.List;
 
 public interface CoordinatesRepositoryService {
@@ -10,4 +12,5 @@ public interface CoordinatesRepositoryService {
     List<Coordinates> findAll();
     Coordinates getCoordinatesByLngAndLat(String lat, String lng);
     Coordinates findCoordinatesById(Long id);
+    List<Date> getDateByCoordinatesId(Long coordinatesId);
 }

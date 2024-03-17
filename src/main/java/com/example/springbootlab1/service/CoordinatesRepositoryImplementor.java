@@ -2,6 +2,7 @@ package com.example.springbootlab1.service;
 
 import com.example.springbootlab1.repository.Coordinates;
 import com.example.springbootlab1.repository.CoordinatesRepository;
+import com.example.springbootlab1.repository.Date;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,5 +43,10 @@ public class CoordinatesRepositoryImplementor implements CoordinatesRepositorySe
     @Override
     public Coordinates findCoordinatesById(Long id) {
         return coordinatesRepository.findCoordinatesById(id);
+    }
+
+    @Override
+    public List<Date> getDateByCoordinatesId(Long coordinatesId) {
+        return coordinatesRepository.getDateByCoordinatesId(coordinatesId);
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -18,7 +17,6 @@ import java.util.Set;
 @RestController
 public class SunriseAndSunsetController {
     public static final String ERROR_MESSAGE_1 = "Please specify a valid path";
-    public static final String ERROR_MESSAGE_2 = "No such country!";
 
     private final CountryRepositoryService countryRepositoryService;
     private final CoordinatesRepositoryService coordinatesRepositoryService;
@@ -128,11 +126,11 @@ public class SunriseAndSunsetController {
         StringBuilder results = new StringBuilder("Results(");
         Country country = countryRepositoryService.findByCountryName(countryName);
         if(country == null){
-            return ERROR_MESSAGE_2;
+            return "No such country!";
         }
         results.append(country.getCountryName()).append("):\n");
 
-        List<Coordinates> coordinatesList = new ArrayList<>(country.getCoordinates());
+        List<Coordinates> coordinatesList = countryRepositoryService.getCoordinatesByCountryName(countryName);
         for(Coordinates coordinate : coordinatesList){
             String url;
             try {
@@ -242,6 +240,11 @@ public class SunriseAndSunsetController {
         }
     }
 
+    @PutMapping (value = "/**")
+    public ResponseEntity<String> defaultPutMethod() {
+        return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
+    }
+
 
     //DELETE
     @DeleteMapping("/sunInfo/country/{countryName}")
@@ -250,7 +253,7 @@ public class SunriseAndSunsetController {
         if(country == null){
             return "There is no such country!";
         }
-        List<Coordinates> coordinates = new ArrayList<>(country.getCoordinates());
+        List<Coordinates> coordinates = countryRepositoryService.getCoordinatesByCountryName(countryName);
         coordinatesRepositoryService.deleteAll(coordinates);
         countryRepositoryService.delete(country);
         return "Deleted successfully!";
@@ -262,7 +265,7 @@ public class SunriseAndSunsetController {
         if(country == null){
             return "There is no such country!";
         }
-        List<Coordinates> coordinates = new ArrayList<>(country.getCoordinates());
+        List<Coordinates> coordinates = countryRepositoryService.getCoordinatesByCountryName(countryName);
         for (Coordinates coordinate : coordinates){
             if(coordinate.checkId(coordinatesId)){
                 coordinatesRepositoryService.deleteById(coordinatesId);
@@ -278,7 +281,7 @@ public class SunriseAndSunsetController {
         if(Objects.equals(removableDate, null)){
             return "No such date id!";
         }
-        List<Coordinates> coordinates = new ArrayList<>(removableDate.getCoordinates());
+        List<Coordinates> coordinates = dateRepositoryService.getCoordinatesByDateId(dateId);
         for (Coordinates coordinate : coordinates){
             if(coordinate.getDates().size() == 1 && Objects.equals(coordinate.getCountry(), null)){
                 removableDate.getCoordinates().remove(coordinate);
@@ -302,7 +305,7 @@ public class SunriseAndSunsetController {
         if(Objects.equals(removableCoordinates, null)){
             return "No such date id!";
         }
-        List<Date> dateList = new ArrayList<>(removableCoordinates.getDates());
+        List<Date> dateList = coordinatesRepositoryService.getDateByCoordinatesId(coordinatesId);
         for (Date date : dateList){
             if(date.getCoordinates().size() == 1){
                 removableCoordinates.getDates().remove(date);

@@ -1,5 +1,6 @@
 package com.example.springbootlab1.service;
 
+import com.example.springbootlab1.repository.Coordinates;
 import com.example.springbootlab1.repository.Country;
 import com.example.springbootlab1.repository.CountryRepository;
 import org.springframework.stereotype.Service;
@@ -33,5 +34,10 @@ public class CountryRepositoryServiceImplementor implements CountryRepositorySer
     @Override
     public List<Country> findAll() {
         return countryRepository.findAll();
+    }
+
+    @Override
+    public List<Coordinates> getCoordinatesByCountryName(String countryName) {
+        return countryRepository.getCoordinatesByCountryName(countryName);
     }
 }
