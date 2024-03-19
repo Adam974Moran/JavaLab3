@@ -1,6 +1,6 @@
 package com.example.springbootlab1.service;
 
-import com.example.springbootlab1.repository.Coordinates;
+import com.example.springbootlab1.model.Coordinates;
 import com.example.springbootlab1.repository.CoordinatesRepository;
 import com.example.springbootlab1.repository.Date;
 import org.springframework.stereotype.Service;

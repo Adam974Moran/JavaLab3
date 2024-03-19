@@ -1,9 +1,9 @@
 package com.example.springbootlab1.controller;
 
-import com.example.springbootlab1.repository.Coordinates;
-import com.example.springbootlab1.repository.Date;
+import com.example.springbootlab1.model.Coordinates;
+import com.example.springbootlab1.model.Date;
 import com.example.springbootlab1.service.*;
-import com.example.springbootlab1.repository.Country;
+import com.example.springbootlab1.model.Country;
 import com.example.springbootlab1.data.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ public class SunriseAndSunsetController {
 
     //CREATE
     @PostMapping("/sunInfo/country/{countryName}/coordinates")
-    public ResponseEntity<Coordinates> addCoordinates(@PathVariable String countryName,
+    public String addCoordinates(@PathVariable String countryName,
                                                       @RequestParam(value = "lat", defaultValue = "null") String lat,
                                                       @RequestParam(value = "lng", defaultValue = "null") String lng){
         Country country = countryRepositoryService.findByCountryName(countryName);
@@ -43,14 +43,14 @@ public class SunriseAndSunsetController {
             countryRepositoryService.save(country);
         }
         if(Objects.equals(lng, "null") || Objects.equals(lat, "null")){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return "Variables \"lng\" and \"lat\" are obligatory!";
         }
         Coordinates coordinates = new Coordinates();
         coordinates.setLat(lat);
         coordinates.setLng(lng);
         coordinates.setCountry(country);
         coordinatesRepositoryService.save(coordinates);
-        return new ResponseEntity<>(coordinates, HttpStatus.CREATED);
+        return "Created successfully!";
     }
 
     @PostMapping(value = "/**")

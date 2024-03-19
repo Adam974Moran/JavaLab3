@@ -1,4 +1,4 @@
-package com.example.springbootlab1.repository;
+package com.example.springbootlab1.model;
 
 import jakarta.persistence.*;
 
