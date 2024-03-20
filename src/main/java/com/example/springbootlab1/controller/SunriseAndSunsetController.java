@@ -5,6 +5,12 @@ import com.example.springbootlab1.model.Date;
 import com.example.springbootlab1.service.*;
 import com.example.springbootlab1.model.Country;
 import com.example.springbootlab1.data.APIResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -145,47 +151,53 @@ public class SunriseAndSunsetController {
     }
 
     @GetMapping("/allCountriesInfo")
-    public StringBuilder getAllCountriesInfo() {
-        StringBuilder result = new StringBuilder("Countries info:\n\n");
+    public String getAllCountriesInfo() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        FilterProvider filters = new SimpleFilterProvider().addFilter("dateFilter", SimpleBeanPropertyFilter.serializeAllExcept("dates"));
         List<Country> countryList = countryRepositoryService.findAll();
-        for (Country country : countryList){
-            result.append("\tcountry_id = ").append(country.getId()).append(", name = ").append(country.getCountryName()).append(":\n");
-            Set<Coordinates> coordinatesSet = country.getCoordinates();
-            for (Coordinates coordinates : coordinatesSet){
-                result.append("\t\tcoordinates_id = ").append(coordinates.getId()).append(", lat(").append(coordinates.getLat()).append("), lng(").append(coordinates.getLng()).append(")\n");
-            }
-        }
-        return result;
+        mapper.setFilterProvider(filters);
+        ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+        return writer.writeValueAsString(countryList);
     }
 
     @GetMapping("/historyByDate")
     public StringBuilder getHistoryByDate() {
-        StringBuilder result = new StringBuilder("History(date):\n\n");
+        StringBuilder result = new StringBuilder("[\n");
         List<Date> datesList = dateRepositoryService.findAll();
         for (Date date : datesList){
-            result.append("\tdate_id = ").append(date.getId()).append(", date = ").append(date.getCoordinatesDate()).append(":\n");
+            result.append("\t{\n\t\t\"id\": ").append(date.getId()).append(", \n\t\t\"date\": \"").append(date.getCoordinatesDate()).append("\",\n\t\t\"coordinates\":[\n");
             Set<Coordinates> coordinatesSet = date.getCoordinates();
             for (Coordinates coordinates : coordinatesSet){
-                result.append("\t\tcoordinates_id = ").append(coordinates.getId()).append(", lat = ").append(coordinates.getLat()).append(", lng = ").append(coordinates.getLng()).append("\n");
+                result.append("\t\t\t{\n\t\t\t\t\"id\": ").append(coordinates.getId()).append(", \n\t\t\t\t\"lat\": \"").append(coordinates.getLat()).append("\", \n\t\t\t\t\"lng\": \"").append(coordinates.getLng()).append("\"\n\t\t\t},");
             }
+            result.deleteCharAt(result.length()-1).append("\n\t\t]\n\t}\n");
         }
+        if(datesList.isEmpty()){
+            result.deleteCharAt(result.length()-1);
+        }
+        result.append("]");
         return result;
     }
 
     @GetMapping("/historyByCoordinates")
     public StringBuilder getHistoryByCoordinates() {
-        StringBuilder result = new StringBuilder("History(coordinates):\n\n");
+        StringBuilder result = new StringBuilder("[\n");
         List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
         for (Coordinates coordinates : coordinatesList){
             Set<Date> dateSet = coordinates.getDates();
             if(Objects.equals(dateSet.size(), 0)){
                 continue;
             }
-            result.append("\tcoordinates_id = ").append(coordinates.getId()).append(", lat = ").append(coordinates.getLat()).append(", lng = ").append(coordinates.getLng()).append("\n");
+            result.append("\t{\n\t\t\"id\": ").append(coordinates.getId()).append(", \n\t\t\"lat\": \"").append(coordinates.getLat()).append("\", \n\t\t\"lng\": \"").append(coordinates.getLng()).append("\",\n\t\t\"dates\":[");
             for (Date date : dateSet){
-                result.append("\t\tdate_id = ").append(date.getId()).append(", date = ").append(date.getCoordinatesDate()).append(":\n");
+                result.append("\n\t\t\t{\n\t\t\t\t\"id\": ").append(date.getId()).append(", \n\t\t\t\t\"date\": \"").append(date.getCoordinatesDate()).append("\"\n\t\t\t},");
             }
+            result.deleteCharAt(result.length()-1).append("\n\t\t]\n\t}\n");
         }
+        if(result.length() == 2){
+            result.deleteCharAt(result.length()-1);
+        }
+        result.append("]");
         return result;
     }
 

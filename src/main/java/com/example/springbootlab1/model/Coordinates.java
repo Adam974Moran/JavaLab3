@@ -1,5 +1,9 @@
 package com.example.springbootlab1.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -7,12 +11,17 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
+@JsonFilter("coordinatesFilter")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Coordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "lat")
     private String lat;
+
+    @Column(name = "lng")
     private String lng;
 
     public Long getId() {
@@ -39,9 +48,11 @@ public class Coordinates {
         this.lng = lng;
     }
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "country_id")
     private Country country;
+
 
     @ManyToMany(mappedBy = "coordinates")
     private Set<Date> date;
@@ -62,8 +73,9 @@ public class Coordinates {
         this.country = country;
     }
 
-
     public boolean checkId(Long id){
         return Objects.equals(this.id, id);
     }
+
+
 }

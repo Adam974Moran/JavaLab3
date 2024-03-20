@@ -1,5 +1,6 @@
 package com.example.springbootlab1.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.Set;
@@ -27,6 +28,7 @@ public class Country {
         this.countryName = countryName;
     }
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "country")
     private Set<Coordinates> coordinates;
 
