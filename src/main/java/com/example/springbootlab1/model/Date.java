@@ -14,7 +14,6 @@ public class Date {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "coordinatesDate")
     private String coordinatesDate;
 
     public Long getId() {

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @RestController
 public class SunriseAndSunsetController {
@@ -122,7 +121,7 @@ public class SunriseAndSunsetController {
             coordinatesRepositoryService.save(coordinates);
         }
 
-        return JsonKeyExtractor.getFormattedJsonKeys(APIResponse.getJsonInString(url));
+        return JsonFormatter.getFormattedJsonKeys(APIResponse.getJsonInString(url));
     }
 
     @GetMapping("/sunInfo/country/{countryName}")
@@ -145,7 +144,7 @@ public class SunriseAndSunsetController {
             catch (WrongFormatException w){
                 return w.getExceptionMessage();
             }
-            results.append(JsonKeyExtractor.getFormattedJsonKeys(APIResponse.getJsonInString(url))).append("\n");
+            results.append(JsonFormatter.getFormattedJsonKeys(APIResponse.getJsonInString(url))).append("\n");
         }
         return results.toString();
     }
@@ -162,43 +161,14 @@ public class SunriseAndSunsetController {
 
     @GetMapping("/historyByDate")
     public StringBuilder getHistoryByDate() {
-        StringBuilder result = new StringBuilder("[\n");
         List<Date> datesList = dateRepositoryService.findAll();
-        for (Date date : datesList){
-            result.append("\t{\n\t\t\"id\": ").append(date.getId()).append(", \n\t\t\"date\": \"").append(date.getCoordinatesDate()).append("\",\n\t\t\"coordinates\":[\n");
-            Set<Coordinates> coordinatesSet = date.getCoordinates();
-            for (Coordinates coordinates : coordinatesSet){
-                result.append("\t\t\t{\n\t\t\t\t\"id\": ").append(coordinates.getId()).append(", \n\t\t\t\t\"lat\": \"").append(coordinates.getLat()).append("\", \n\t\t\t\t\"lng\": \"").append(coordinates.getLng()).append("\"\n\t\t\t},");
-            }
-            result.deleteCharAt(result.length()-1).append("\n\t\t]\n\t}\n");
-        }
-        if(datesList.isEmpty()){
-            result.deleteCharAt(result.length()-1);
-        }
-        result.append("]");
-        return result;
+        return JsonFormatter.getFormattedJsonForDates(datesList);
     }
 
     @GetMapping("/historyByCoordinates")
     public StringBuilder getHistoryByCoordinates() {
-        StringBuilder result = new StringBuilder("[\n");
         List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
-        for (Coordinates coordinates : coordinatesList){
-            Set<Date> dateSet = coordinates.getDates();
-            if(Objects.equals(dateSet.size(), 0)){
-                continue;
-            }
-            result.append("\t{\n\t\t\"id\": ").append(coordinates.getId()).append(", \n\t\t\"lat\": \"").append(coordinates.getLat()).append("\", \n\t\t\"lng\": \"").append(coordinates.getLng()).append("\",\n\t\t\"dates\":[");
-            for (Date date : dateSet){
-                result.append("\n\t\t\t{\n\t\t\t\t\"id\": ").append(date.getId()).append(", \n\t\t\t\t\"date\": \"").append(date.getCoordinatesDate()).append("\"\n\t\t\t},");
-            }
-            result.deleteCharAt(result.length()-1).append("\n\t\t]\n\t}\n");
-        }
-        if(result.length() == 2){
-            result.deleteCharAt(result.length()-1);
-        }
-        result.append("]");
-        return result;
+        return JsonFormatter.getFormattedJsonForCoordinates(coordinatesList);
     }
 
     @GetMapping(value = "/**")
