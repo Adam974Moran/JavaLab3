@@ -19,14 +19,14 @@ public class JsonFormatter {
     }
 
     public static StringBuilder getFormattedJsonForDates(List<Date> datesList){
-        StringBuilder result = new StringBuilder("[\n");
+        StringBuilder result = new StringBuilder("[ ");
         for (Date date : datesList){
-            result.append("\t{\n\t\t\"id\": ").append(date.getId()).append(", \n\t\t\"date\": \"").append(date.getCoordinatesDate()).append("\",\n\t\t\"coordinates\":[\n");
+            result.append("{\n  \"id\": ").append(date.getId()).append(", \n  \"date\": \"").append(date.getCoordinatesDate()).append("\",\n  \"coordinates\":[");
             Set<Coordinates> coordinatesSet = date.getCoordinates();
             for (Coordinates coordinates : coordinatesSet){
-                result.append("\t\t\t{\n\t\t\t\t\"id\": ").append(coordinates.getId()).append(", \n\t\t\t\t\"lat\": \"").append(coordinates.getLat()).append("\", \n\t\t\t\t\"lng\": \"").append(coordinates.getLng()).append("\"\n\t\t\t},");
+                result.append(" {\n    \"id\": ").append(coordinates.getId()).append(", \n    \"lat\": \"").append(coordinates.getLat()).append("\", \n    \"lng\": \"").append(coordinates.getLng()).append("\"\n   },");
             }
-            result.deleteCharAt(result.length()-1).append("\n\t\t]\n\t}\n");
+            result.deleteCharAt(result.length()-1).append(" ]\n}, ");
         }
         if(datesList.isEmpty()){
             result.deleteCharAt(result.length()-1);
@@ -36,17 +36,17 @@ public class JsonFormatter {
     }
 
     public static StringBuilder getFormattedJsonForCoordinates(List<Coordinates> coordinatesList){
-        StringBuilder result = new StringBuilder("[\n");
+        StringBuilder result = new StringBuilder("[ ");
         for (Coordinates coordinates : coordinatesList){
             Set<Date> dateSet = coordinates.getDates();
             if(Objects.equals(dateSet.size(), 0)){
                 continue;
             }
-            result.append("\t{\n\t\t\"id\": ").append(coordinates.getId()).append(", \n\t\t\"lat\": \"").append(coordinates.getLat()).append("\", \n\t\t\"lng\": \"").append(coordinates.getLng()).append("\",\n\t\t\"dates\":[");
+            result.append("{\n  \"id\": ").append(coordinates.getId()).append(", \n  \"lat\": \"").append(coordinates.getLat()).append("\", \n  \"lng\": \"").append(coordinates.getLng()).append("\",\n  \"dates\":[");
             for (Date date : dateSet){
-                result.append("\n\t\t\t{\n\t\t\t\t\"id\": ").append(date.getId()).append(", \n\t\t\t\t\"date\": \"").append(date.getCoordinatesDate()).append("\"\n\t\t\t},");
+                result.append(" {\n    \"id\": ").append(date.getId()).append(", \n    \"date\": \"").append(date.getCoordinatesDate()).append("\"\n   },");
             }
-            result.deleteCharAt(result.length()-1).append("\n\t\t]\n\t}\n");
+            result.deleteCharAt(result.length()-1).append(" ]\n}, ");
         }
         if(result.length() == 2){
             result.deleteCharAt(result.length()-1);

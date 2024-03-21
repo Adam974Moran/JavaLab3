@@ -149,23 +149,23 @@ public class SunriseAndSunsetController {
         return results.toString();
     }
 
-    @GetMapping("/allCountriesInfo")
+    @GetMapping(value = "/allCountriesInfo", produces = "application/json")
     public String getAllCountriesInfo() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        FilterProvider filters = new SimpleFilterProvider().addFilter("dateFilter", SimpleBeanPropertyFilter.serializeAllExcept("dates"));
+        FilterProvider filters = new SimpleFilterProvider().addFilter("coordinatesFilter", SimpleBeanPropertyFilter.serializeAllExcept("dates"));
         List<Country> countryList = countryRepositoryService.findAll();
         mapper.setFilterProvider(filters);
         ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
         return writer.writeValueAsString(countryList);
     }
 
-    @GetMapping("/historyByDate")
+    @GetMapping(value = "/historyByDate", produces = "application/json")
     public StringBuilder getHistoryByDate() {
         List<Date> datesList = dateRepositoryService.findAll();
         return JsonFormatter.getFormattedJsonForDates(datesList);
     }
 
-    @GetMapping("/historyByCoordinates")
+    @GetMapping(value = "/historyByCoordinates", produces = "application/json")
     public StringBuilder getHistoryByCoordinates() {
         List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
         return JsonFormatter.getFormattedJsonForCoordinates(coordinatesList);
