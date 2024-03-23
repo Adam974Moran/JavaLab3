@@ -5,12 +5,6 @@ import com.example.springbootlab1.model.Date;
 import com.example.springbootlab1.service.*;
 import com.example.springbootlab1.model.Country;
 import com.example.springbootlab1.data.APIResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @RestController
 public class SunriseAndSunsetController {
@@ -26,13 +21,16 @@ public class SunriseAndSunsetController {
     private final CountryRepositoryService countryRepositoryService;
     private final CoordinatesRepositoryService coordinatesRepositoryService;
     private final DateRepositoryService dateRepositoryService;
+    private final CacheService cacheService;
 
     public SunriseAndSunsetController(CountryRepositoryService countryRepositoryService,
                                       CoordinatesRepositoryService coordinatesRepositoryService,
-                                      DateRepositoryService dateRepositoryService){
+                                      DateRepositoryService dateRepositoryService,
+                                      CacheService cacheService){
         this.countryRepositoryService = countryRepositoryService;
         this.coordinatesRepositoryService = coordinatesRepositoryService;
         this.dateRepositoryService = dateRepositoryService;
+        this.cacheService = cacheService;
     }
 
 
@@ -121,7 +119,7 @@ public class SunriseAndSunsetController {
             coordinatesRepositoryService.save(coordinates);
         }
 
-        return JsonFormatter.getFormattedJsonKeys(APIResponse.getJsonInString(url));
+        return JsonFormatter.getFormattedJsonKeys(cacheService.getOrRecordSunInfoInString(url));
     }
 
     @GetMapping("/sunInfo/country/{countryName}")
@@ -150,32 +148,44 @@ public class SunriseAndSunsetController {
     }
 
     @GetMapping(value = "/allCountriesInfo", produces = "application/json")
-    public String getAllCountriesInfo() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        FilterProvider filters = new SimpleFilterProvider().addFilter("coordinatesFilter", SimpleBeanPropertyFilter.serializeAllExcept("dates"));
-        List<Country> countryList = countryRepositoryService.findAll();
-        mapper.setFilterProvider(filters);
-        ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-        return writer.writeValueAsString(countryList);
+    public ResponseEntity<List<Country>> getAllCountriesInfo() {
+        return new ResponseEntity<>(countryRepositoryService.findAll(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/historyByDate", produces = "application/json")
-    public StringBuilder getHistoryByDate() {
+    public ResponseEntity<List<Date>> getHistoryByDate() {
         List<Date> datesList = dateRepositoryService.findAll();
-        return JsonFormatter.getFormattedJsonForDates(datesList);
+        return new ResponseEntity<>(datesList, HttpStatus.OK);
     }
 
     @GetMapping(value = "/historyByCoordinates", produces = "application/json")
-    public StringBuilder getHistoryByCoordinates() {
+    public ResponseEntity<List<Coordinates>> getHistoryByCoordinates() {
         List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
-        return JsonFormatter.getFormattedJsonForCoordinates(coordinatesList);
+        return new ResponseEntity<>(coordinatesList, HttpStatus.OK);
+    }
+
+    //END POINT FOR LAB 3
+    @GetMapping("sunInfo/date")
+    public Object getSunsetAndSunriseInformationByDate(@RequestParam(value = "dateId", defaultValue = "null") Long dateId){
+        StringBuilder result = new StringBuilder("Result:\n");
+        Set<Coordinates> coordinatesSet = dateRepositoryService.getCoordinatesListByDateId(dateId);
+        for(Coordinates coordinates : coordinatesSet){
+            String url;
+            try {
+                url = UrlGenerator.generateNewUrl(coordinates.getLat(), coordinates.getLng(), dateRepositoryService.findDateById(dateId).getCoordinatesDate(), null);
+            }
+            catch (WrongFormatException w){
+                return w.getExceptionMessage();
+            }
+            result.append("\n").append(JsonFormatter.getFormattedJsonKeys(cacheService.getOrRecordSunInfoInString(url)));
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/**")
     public ResponseEntity<String> defaultGetMethod() {
         return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
     }
-
 
     //PUT
     @PutMapping("/country/{countryName}/{newCountryName}")
@@ -310,8 +320,8 @@ public class SunriseAndSunsetController {
         return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException() {
-        return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<Object> handleException() {
+//        return new ResponseEntity<>(HttpStatus., HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 }
