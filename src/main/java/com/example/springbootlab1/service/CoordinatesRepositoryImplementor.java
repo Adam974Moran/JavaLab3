@@ -1,8 +1,8 @@
 package com.example.springbootlab1.service;
 
 import com.example.springbootlab1.model.Coordinates;
+import com.example.springbootlab1.model.Date;
 import com.example.springbootlab1.repository.CoordinatesRepository;
-import com.example.springbootlab1.repository.Date;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,10 +34,6 @@ public class CoordinatesRepositoryImplementor implements CoordinatesRepositorySe
     @Override
     public List<Coordinates> findAll() {
         return coordinatesRepository.findAll();
-    }
-
-    public Coordinates getCoordinatesByLngAndLat(String lat, String lng) {
-        return coordinatesRepository.getCoordinatesByLngAndLat(lat, lng);
     }
 
     @Override

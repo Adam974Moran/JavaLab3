@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @RestController
 public class SunriseAndSunsetController {
@@ -168,7 +167,7 @@ public class SunriseAndSunsetController {
     @GetMapping("sunInfo/date")
     public Object getSunsetAndSunriseInformationByDate(@RequestParam(value = "dateId", defaultValue = "null") Long dateId){
         StringBuilder result = new StringBuilder("Result:\n");
-        Set<Coordinates> coordinatesSet = dateRepositoryService.getCoordinatesListByDateId(dateId);
+        List<Coordinates> coordinatesSet = dateRepositoryService.getCoordinatesByDateId(dateId);
         for(Coordinates coordinates : coordinatesSet){
             String url;
             try {

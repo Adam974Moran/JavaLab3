@@ -11,7 +11,6 @@ public interface CoordinatesRepositoryService {
     void deleteAll(List<Coordinates> coordinatesList);
     void deleteById(Long id);
     List<Coordinates> findAll();
-    Coordinates getCoordinatesByLngAndLat(String lat, String lng);
     Coordinates findCoordinatesById(Long id);
     List<Date> getDateByCoordinatesId(Long coordinatesId);
 }
