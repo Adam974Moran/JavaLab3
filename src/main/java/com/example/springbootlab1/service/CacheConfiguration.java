@@ -20,8 +20,8 @@ public class CacheConfiguration {
     }
 
     @CacheEvict(cacheNames = "sunInfoCache", allEntries = true)
-    @Scheduled(fixedRate = 600000) //10 минут ожидания
-    public void clearCache() {
+    @Scheduled(fixedRate = 6000) //10 минут ожидания
+    public void clearCache(){
         //Метод пустой так как для аннотации @CacheEvict,
         //которая просто очищает кеш, аннотация не нужна
     }
