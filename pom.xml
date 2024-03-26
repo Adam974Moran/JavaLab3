@@ -14,7 +14,7 @@
     <name>spring-boot-tutorial</name>
     <description>spring-boot-tutorial</description>
     <properties>
-        <java.version>21</java.version>
+        <java.version>18</java.version>
     </properties>
     <dependencies>
         <dependency>
