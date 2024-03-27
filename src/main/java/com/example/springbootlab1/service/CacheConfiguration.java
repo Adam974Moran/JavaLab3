@@ -17,8 +17,7 @@ public class CacheConfiguration {
     @Bean
     public CaffeineCacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("sunInfoCache");
-        cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(100).expireAfterWrite(10, TimeUnit.MINUTES).
-                evictionListener((key, value, cause) -> System.out.println("Evicted: " + key + ", Cause: " + cause.toString())));
+        cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(100).expireAfterWrite(10, TimeUnit.MINUTES));
         return cacheManager;
     }
 }
