@@ -1,4 +1,4 @@
-package com.example.springbootlab1.service;
+package com.example.springbootlab1.cache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.annotation.EnableCaching;
