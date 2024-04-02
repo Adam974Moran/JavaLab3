@@ -68,7 +68,7 @@ public class SunriseAndSunsetController {
 
 
     //READ
-    @GetMapping("/sunInfo")
+    @GetMapping(value = "/sunInfo", produces = "application/json")
     public String getSunriseAndSunsetInfo(@RequestParam(value = "lat", defaultValue = "null") String lat,
                                           @RequestParam(value = "lng", defaultValue = "null") String lng,
                                           @RequestParam(value = "date", defaultValue = "null") String date,

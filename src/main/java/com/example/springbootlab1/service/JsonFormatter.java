@@ -15,7 +15,7 @@ public class JsonFormatter {
     public static String getFormattedJsonKeys(String jsonResponse){
         Gson json = new Gson();
         SunriseAndSunsetKeys sunrise = json.fromJson(jsonResponse, SunriseAndSunsetKeys.class);
-        return "Sunrise " + sunrise.results.sunrise + ", sunset " + sunrise.results.sunset;
+        return "{\"sunrise\": \"" + sunrise.results.sunrise + "\", \"sunset\": \"" + sunrise.results.sunset +"\"}";
     }
 
     public static StringBuilder getFormattedJsonForDates(List<Date> datesList){

@@ -3,13 +3,18 @@ package com.example.springbootlab1.cache;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
 @Data
+@EnableScheduling
 public class APIResponseCache {
 
     private static final int MAX_AMOUNT_OF_ELEMENTS = 3;
@@ -22,6 +27,16 @@ public class APIResponseCache {
             return size() > MAX_AMOUNT_OF_ELEMENTS;
         }
     };
+
+    @Scheduled(fixedRate = 5000)
+    public void updateCache() {
+        RestTemplate restTemplate = new RestTemplate();
+        for (String key : cache.keySet()) {
+            ResponseEntity<String> response = restTemplate.getForEntity(key, String.class);
+            addToCache(key, response.getBody());
+        }
+        logger.info("Cache has been updated successfully!");
+    }
 
     public void addToCache(String key, String value) {
         cache.put(key, value);
