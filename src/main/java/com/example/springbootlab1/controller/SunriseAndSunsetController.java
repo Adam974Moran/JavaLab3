@@ -1,6 +1,5 @@
 package com.example.springbootlab1.controller;
 
-import com.example.springbootlab1.cache.CacheService;
 import com.example.springbootlab1.model.Coordinates;
 import com.example.springbootlab1.model.Date;
 import com.example.springbootlab1.service.*;
@@ -26,16 +25,13 @@ public class SunriseAndSunsetController {
     private final CountryRepositoryService countryRepositoryService;
     private final CoordinatesRepositoryService coordinatesRepositoryService;
     private final DateRepositoryService dateRepositoryService;
-    private final CacheService cacheService;
 
     public SunriseAndSunsetController(CountryRepositoryService countryRepositoryService,
                                       CoordinatesRepositoryService coordinatesRepositoryService,
-                                      DateRepositoryService dateRepositoryService,
-                                      CacheService cacheService){
+                                      DateRepositoryService dateRepositoryService){
         this.countryRepositoryService = countryRepositoryService;
         this.coordinatesRepositoryService = coordinatesRepositoryService;
         this.dateRepositoryService = dateRepositoryService;
-        this.cacheService = cacheService;
     }
 
 
@@ -132,7 +128,7 @@ public class SunriseAndSunsetController {
             logger.info("New date has been saved to data base");
         }
 
-        return JsonFormatter.getFormattedJsonKeys(cacheService.getOrRecordSunInfoInString(url));
+        return JsonFormatter.getFormattedJsonKeys(APIResponse.getJsonInString(url));
     }
 
     @GetMapping("/sunInfo/country/{countryName}")
@@ -198,7 +194,7 @@ public class SunriseAndSunsetController {
                 logger.error(LOGGER_ERROR_MESSAGE_1);
                 return w.getExceptionMessage();
             }
-            result.append("\n").append(JsonFormatter.getFormattedJsonKeys(cacheService.getOrRecordSunInfoInString(url)));
+            result.append("\n").append(JsonFormatter.getFormattedJsonKeys(APIResponse.getJsonInString(url)));
         }
         logger.info("Getting result");
         return ResponseEntity.ok(result);
@@ -266,8 +262,7 @@ public class SunriseAndSunsetController {
         logger.error("Incorrect endpoint in PUT method");
         return new ResponseEntity<>(ERROR_MESSAGE_1, HttpStatus.BAD_REQUEST);
     }
-
-
+    
     //DELETE
     @DeleteMapping("/sunInfo/country/{countryName}")
     public String deleteCoordinates(@PathVariable String countryName){
