@@ -2,10 +2,23 @@ package com.example.springbootlab1.service;
 
 import java.util.Objects;
 
+/**
+ * The type Url generator.
+ */
 public class UrlGenerator {
   private UrlGenerator() {
   }
 
+  /**
+   * Generate new url string.
+   *
+   * @param lat       the lat
+   * @param lng       the lng
+   * @param date      the date
+   * @param formatted the formatted
+   * @return the string
+   * @throws WrongFormatException the wrong format exception
+   */
   public static String generateNewUrl(String lat, String lng, String date, String formatted)
       throws WrongFormatException {
     if (Objects.equals(lat, "null") || Objects.equals(lng, "null")) {

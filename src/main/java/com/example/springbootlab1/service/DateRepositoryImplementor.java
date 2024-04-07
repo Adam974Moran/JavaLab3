@@ -7,11 +7,19 @@ import com.example.springbootlab1.repository.DateRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Date repository implementor.
+ */
 @Service
 public class DateRepositoryImplementor implements DateRepositoryService {
 
   private final DateRepository dateRepository;
 
+  /**
+   * Instantiates a new Date repository implementor.
+   *
+   * @param dateRepository the date repository
+   */
   public DateRepositoryImplementor(DateRepository dateRepository) {
     this.dateRepository = dateRepository;
   }

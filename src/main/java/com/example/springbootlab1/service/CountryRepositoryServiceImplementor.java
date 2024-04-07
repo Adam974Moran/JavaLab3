@@ -6,11 +6,19 @@ import com.example.springbootlab1.repository.CountryRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Country repository service implementor.
+ */
 @Service
 public class CountryRepositoryServiceImplementor implements CountryRepositoryService {
 
   private final CountryRepository countryRepository;
 
+  /**
+   * Instantiates a new Country repository service implementor.
+   *
+   * @param countryRepository the country repository
+   */
   public CountryRepositoryServiceImplementor(CountryRepository countryRepository) {
     this.countryRepository = countryRepository;
   }

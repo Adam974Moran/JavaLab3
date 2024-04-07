@@ -6,11 +6,19 @@ import com.example.springbootlab1.repository.CoordinatesRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Coordinates repository implementor.
+ */
 @Service
 public class CoordinatesRepositoryImplementor implements CoordinatesRepositoryService {
 
   private final CoordinatesRepository coordinatesRepository;
 
+  /**
+   * Instantiates a new Coordinates repository implementor.
+   *
+   * @param coordinatesRepository the coordinates repository
+   */
   public CoordinatesRepositoryImplementor(CoordinatesRepository coordinatesRepository) {
     this.coordinatesRepository = coordinatesRepository;
   }

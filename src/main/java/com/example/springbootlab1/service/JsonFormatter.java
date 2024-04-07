@@ -7,10 +7,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * The type Json formatter.
+ */
 public class JsonFormatter {
   private JsonFormatter() {
   }
 
+  /**
+   * Gets formatted json keys.
+   *
+   * @param jsonResponse the json response
+   * @return the formatted json keys
+   */
   public static String getFormattedJsonKeys(String jsonResponse) {
     Gson json = new Gson();
     SunriseAndSunsetKeys sunrise = json.fromJson(jsonResponse, SunriseAndSunsetKeys.class);
@@ -18,6 +27,12 @@ public class JsonFormatter {
         + sunrise.results.sunset + "\"}";
   }
 
+  /**
+   * Gets formatted json for dates.
+   *
+   * @param datesList the dates list
+   * @return the formatted json for dates
+   */
   public static StringBuilder getFormattedJsonForDates(List<Date> datesList) {
     StringBuilder result = new StringBuilder("[ ");
     for (Date date : datesList) {
@@ -38,6 +53,12 @@ public class JsonFormatter {
     return result;
   }
 
+  /**
+   * Gets formatted json for coordinates.
+   *
+   * @param coordinatesList the coordinates list
+   * @return the formatted json for coordinates
+   */
   public static StringBuilder getFormattedJsonForCoordinates(List<Coordinates> coordinatesList) {
     StringBuilder result = new StringBuilder("[ ");
     for (Coordinates coordinates : coordinatesList) {

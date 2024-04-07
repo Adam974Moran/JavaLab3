@@ -15,6 +15,9 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * The type Coordinates.
+ */
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Coordinates {
@@ -32,46 +35,100 @@ public class Coordinates {
   @ManyToMany(mappedBy = "coordinates")
   private Set<Date> date;
 
+  /**
+   * Instantiates a new Coordinates.
+   */
   public Coordinates() {
     date = new HashSet<>();
   }
 
+  /**
+   * Gets id.
+   *
+   * @return the id
+   */
   public Long getId() {
     return id;
   }
 
+  /**
+   * Sets id.
+   *
+   * @param id the id
+   */
   public void setId(Long id) {
     this.id = id;
   }
 
+  /**
+   * Gets lat.
+   *
+   * @return the lat
+   */
   public String getLat() {
     return lat;
   }
 
+  /**
+   * Sets lat.
+   *
+   * @param lat the lat
+   */
   public void setLat(String lat) {
     this.lat = lat;
   }
 
+  /**
+   * Gets lng.
+   *
+   * @return the lng
+   */
   public String getLng() {
     return lng;
   }
 
+  /**
+   * Sets lng.
+   *
+   * @param lng the lng
+   */
   public void setLng(String lng) {
     this.lng = lng;
   }
 
+  /**
+   * Gets country.
+   *
+   * @return the country
+   */
   public Country getCountry() {
     return country;
   }
 
+  /**
+   * Sets country.
+   *
+   * @param country the country
+   */
   public void setCountry(Country country) {
     this.country = country;
   }
 
+  /**
+   * Gets dates.
+   *
+   * @return the dates
+   */
   public Set<Date> getDates() {
     return date;
   }
 
+  /**
+   * Check id boolean.
+   *
+   * @param id the id
+   * @return the boolean
+   */
   public boolean checkId(Long id) {
     return Objects.equals(this.id, id);
   }

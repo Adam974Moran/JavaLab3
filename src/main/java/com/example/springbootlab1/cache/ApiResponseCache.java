@@ -11,6 +11,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * The type Api response cache.
+ */
 @Component
 @Data
 @EnableScheduling
@@ -27,6 +30,9 @@ public class ApiResponseCache {
     }
   };
 
+  /**
+   * Update cache.
+   */
   @Scheduled(fixedRate = 5000)
   public void updateCache() {
     RestTemplate restTemplate = new RestTemplate();
@@ -37,10 +43,22 @@ public class ApiResponseCache {
     logger.info("Cache has been updated successfully!");
   }
 
+  /**
+   * Add to cache.
+   *
+   * @param key   the key
+   * @param value the value
+   */
   public void addToCache(String key, String value) {
     cache.put(key, value);
   }
 
+  /**
+   * Gets from cache.
+   *
+   * @param key the key
+   * @return the from cache
+   */
   public String getFromCache(String key) {
     return cache.get(key);
   }

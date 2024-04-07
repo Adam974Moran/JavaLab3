@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,27 +24,26 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 /**
- * Этот класс представляет собой главный контроллер сервиса.
+ * The type Sunrise and sunset controller.
  */
 @RestController
 public class SunriseAndSunsetController {
   private static final Logger logger = LoggerFactory.getLogger(SunriseAndSunsetController.class);
-  private static final String DELETE_METHOD = "DELETE";
+  private static final String COUNTRY_NOT_FOUND = "Country not found";
+  private static final String COORDINATES_NOT_FOUND = "Coordinates not found";
 
   private final CountryRepositoryService countryRepositoryService;
   private final CoordinatesRepositoryService coordinatesRepositoryService;
   private final DateRepositoryService dateRepositoryService;
 
   /**
-   * Конструктор контроллера.
+   * Instantiates a new Sunrise and sunset controller.
    *
-   * @param countryRepositoryService     - сервис для стран
-   * @param coordinatesRepositoryService - сервис для координат
-   * @param dateRepositoryService        - сервис для дат
+   * @param countryRepositoryService     the country repository service
+   * @param coordinatesRepositoryService the coordinates repository service
+   * @param dateRepositoryService        the date repository service
    */
   public SunriseAndSunsetController(CountryRepositoryService countryRepositoryService,
                                     CoordinatesRepositoryService coordinatesRepositoryService,
@@ -56,20 +54,19 @@ public class SunriseAndSunsetController {
   }
 
   /**
-   * Этот метод сохраняет координаты по стране в БД.
+   * Add coordinates string.
    *
-   * @param countryName - название страны
-   * @param lat         - широта
-   * @param lng         - долгота
-   * @return - возвращает строку оповещающую об успешном завершении запроса
-   * @throws NoHandlerFoundException - выбрасывает исключение, если произошла
-   *                                 ошибка при вводе данных пользователем
+   * @param countryName the country name
+   * @param lat         the lat
+   * @param lng         the lng
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
    */
   @PostMapping("/sunInfo/country/{countryName}/coordinates")
   public String addCoordinates(@PathVariable String countryName,
                                @RequestParam(value = "lat", defaultValue = "null") String lat,
                                @RequestParam(value = "lng", defaultValue = "null") String lng)
-      throws NoHandlerFoundException {
+      throws IllegalAccessException {
     logger.info("Processing post request \"/sunInfo/country/countryName/coordinates\"");
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
@@ -78,8 +75,7 @@ public class SunriseAndSunsetController {
       countryRepositoryService.save(country);
     }
     if (Objects.equals(lng, "null") || Objects.equals(lat, "null")) {
-      throw new NoHandlerFoundException("POST", "/sunInfo/country/{countryName}/coordinates",
-          new HttpHeaders());
+      throw new IllegalAccessException(COORDINATES_NOT_FOUND);
     }
     Coordinates coordinates = new Coordinates();
     coordinates.setLat(lat);
@@ -90,23 +86,13 @@ public class SunriseAndSunsetController {
   }
 
   /**
-   * Метод для исключения.
-   */
-  @PostMapping(value = "/**")
-  public void defaultPostMethod() {
-    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-  }
-
-
-  /**
-   * Метод, отправляющий запрос на удаленный API сервис, для получения
-   * восхода и захода солнца.
+   * Gets sunrise and sunset info.
    *
-   * @param lat       - широта
-   * @param lng       - долгота
-   * @param date      - дата восхода и захода
-   * @param formatted - формат вывода времени
-   * @return - возвращает json
+   * @param lat       the lat
+   * @param lng       the lng
+   * @param date      the date
+   * @param formatted the formatted
+   * @return the sunrise and sunset info
    */
   @GetMapping(value = "/sunInfo", produces = "application/json")
   public String getSunriseAndSunsetInfo(
@@ -169,23 +155,24 @@ public class SunriseAndSunsetController {
   }
 
   /**
-   * Метод, выдающий координаты по стране.
+   * Gets coordinates by country.
    *
-   * @param countryName - имя страны
-   * @param date        - дата
-   * @return - возвращает json c координатами страны
-   * @throws NoHandlerFoundException - выбрасывает исключение, если произошла
-   *                                 ошибка при вводе данных пользователем
+   * @param countryName the country name
+   * @param date        the date
+   * @return the coordinates by country
+   * @throws IllegalAccessException the illegal access exception
    */
   @GetMapping("/sunInfo/country/{countryName}")
   public String getCoordinatesByCountry(@PathVariable String countryName,
                                         @RequestParam(value = "date", defaultValue = "null")
-                                        String date) throws NoHandlerFoundException {
+                                        String date)
+      throws IllegalAccessException {
     logger.info("Processing get request \"/sunInfo/country/{countryName}\"");
     StringBuilder results = new StringBuilder("Results(");
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
-      throw new NoHandlerFoundException("GET", "/sunInfo/country/{countryName}", new HttpHeaders());
+
+      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
     }
     results.append(country.getCountryName()).append("):\n");
 
@@ -204,6 +191,11 @@ public class SunriseAndSunsetController {
     return results.toString();
   }
 
+  /**
+   * Gets all countries info.
+   *
+   * @return the all countries info
+   */
   @GetMapping(value = "/allCountriesInfo", produces = "application/json")
   public ResponseEntity<List<Country>> getAllCountriesInfo() {
     logger.info("Processing get request \"/allCountriesInfo\"");
@@ -211,9 +203,9 @@ public class SunriseAndSunsetController {
   }
 
   /**
-   * Метод, возвразщающий историю запросов по дате.
+   * Gets history by date.
    *
-   * @return - возвращает список дат и их координаты
+   * @return the history by date
    */
   @GetMapping(value = "/historyByDate", produces = "application/json")
   public ResponseEntity<List<Date>> getHistoryByDate() {
@@ -223,9 +215,9 @@ public class SunriseAndSunsetController {
   }
 
   /**
-   * Метод, возвращающий историю запросов по координатам.
+   * Gets history by coordinates.
    *
-   * @return - возвращает список координат и их даты
+   * @return the history by coordinates
    */
   @GetMapping(value = "/historyByCoordinates", produces = "application/json")
   public ResponseEntity<List<Coordinates>> getHistoryByCoordinates() {
@@ -236,6 +228,12 @@ public class SunriseAndSunsetController {
 
   //END POINT FOR LAB 3
 
+  /**
+   * Gets sunset and sunrise information by date.
+   *
+   * @param dateId the date id
+   * @return the sunset and sunrise information by date
+   */
   @GetMapping(value = "/sunInfo/date", produces = "application/json")
   public Object getSunsetAndSunriseInformationByDate(
       @RequestParam(value = "dateId", defaultValue = "null") Long dateId) {
@@ -259,22 +257,24 @@ public class SunriseAndSunsetController {
     return ResponseEntity.ok(result);
   }
 
-  @GetMapping(value = "/**")
-  public void defaultGetMethod() {
-    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-  }
-
+  /**
+   * Update country name string.
+   *
+   * @param countryName    the country name
+   * @param newCountryName the new country name
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
+   */
   //PUT
   @PutMapping("/country/{countryName}/{newCountryName}")
   public String updateCountryName(@PathVariable String countryName,
                                   @PathVariable String newCountryName)
-      throws NoHandlerFoundException {
+      throws IllegalAccessException {
     logger.info("Processing put request \"/country/{countryName}/{newCountryName}\"");
     Country country = countryRepositoryService.findByCountryName(countryName);
     Country countryCheck = countryRepositoryService.findByCountryName(newCountryName);
     if (Objects.equals(country, null) || !Objects.equals(countryCheck, null)) {
-      throw new NoHandlerFoundException("PUT", "/country/{countryName}/{newCountryName}",
-          new HttpHeaders());
+      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
     } else {
       country.setCountryName(newCountryName);
       countryRepositoryService.save(country);
@@ -282,16 +282,25 @@ public class SunriseAndSunsetController {
     }
   }
 
+  /**
+   * Update country name string.
+   *
+   * @param coordinatesId the coordinates id
+   * @param lat           the lat
+   * @param lng           the lng
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
+   */
   @PutMapping("/coordinates/{coordinatesId}")
   public String updateCountryName(@PathVariable Long coordinatesId,
                                   @RequestParam(value = "lat", defaultValue = "null") String lat,
                                   @RequestParam(value = "lng", defaultValue = "null") String lng)
-      throws NoHandlerFoundException {
+      throws IllegalAccessException {
     logger.info("Processing put request \"/coordinates/{coordinatesId}\"");
     Coordinates coordinates = coordinatesRepositoryService.findCoordinatesById(coordinatesId);
     if (Objects.equals(coordinates, null) || Objects.equals(lat, "null")
         || Objects.equals(lng, "null")) {
-      throw new NoHandlerFoundException("PUT", "/coordinates/{coordinatesId}", new HttpHeaders());
+      throw new IllegalAccessException(COORDINATES_NOT_FOUND);
     } else {
       coordinates.setLat(lat);
       coordinates.setLng(lng);
@@ -300,14 +309,22 @@ public class SunriseAndSunsetController {
     }
   }
 
+  /**
+   * Update date value string.
+   *
+   * @param dateId       the date id
+   * @param newDateValue the new date value
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
+   */
   @PutMapping("/date/{dateId}/{newDateValue}")
   public String updateDateValue(@PathVariable Long dateId, @PathVariable String newDateValue)
-      throws NoHandlerFoundException {
+      throws IllegalAccessException {
     logger.info("Processing put request \"/date/{dateId}/{newDateValue}\"");
     Date dateToUpdate = dateRepositoryService.findDateById(dateId);
     Date dateToCheck = dateRepositoryService.findByDate(newDateValue);
     if (Objects.equals(dateToUpdate, null) || !Objects.equals(dateToCheck, null)) {
-      throw new NoHandlerFoundException("PUT", "/date/{dateId}/{newDateValue}", new HttpHeaders());
+      throw new IllegalAccessException("Date not found");
     } else {
       dateToUpdate.setCoordinatesDate(newDateValue);
       dateRepositoryService.save(dateToUpdate);
@@ -315,19 +332,21 @@ public class SunriseAndSunsetController {
     }
   }
 
-  @PutMapping(value = "/**")
-  public void defaultPutMethod() {
-    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-  }
-
+  /**
+   * Delete coordinates string.
+   *
+   * @param countryName the country name
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
+   */
   //DELETE
   @DeleteMapping("/sunInfo/country/{countryName}")
-  public String deleteCoordinates(@PathVariable String countryName) throws NoHandlerFoundException {
+  public String deleteCoordinates(@PathVariable String countryName)
+      throws IllegalAccessException {
     logger.info("Processing delete request \"/sunInfo/country/{countryName}\"");
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
-      throw new NoHandlerFoundException(DELETE_METHOD, "/sunInfo/country/{countryName}",
-          new HttpHeaders());
+      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
     }
     List<Coordinates> coordinates =
         countryRepositoryService.getCoordinatesByCountryName(countryName);
@@ -336,15 +355,22 @@ public class SunriseAndSunsetController {
     return "Deleted successfully!";
   }
 
+  /**
+   * Delete coordinates string.
+   *
+   * @param countryName   the country name
+   * @param coordinatesId the coordinates id
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
+   */
   @DeleteMapping("/sunInfo/country/{countryName}/coordinates/{coordinatesId}")
   public String deleteCoordinates(@PathVariable String countryName,
-                                  @PathVariable Long coordinatesId) throws NoHandlerFoundException {
+                                  @PathVariable Long coordinatesId) throws IllegalAccessException {
     logger.info(
         "Processing delete request \"/sunInfo/country/{countryName}/coordinates/{coordinatesId}\"");
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
-      throw new NoHandlerFoundException(DELETE_METHOD,
-          "/sunInfo/country/{countryName}/coordinates/{coordinatesId}", new HttpHeaders());
+      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
     }
     List<Coordinates> coordinates =
         countryRepositoryService.getCoordinatesByCountryName(countryName);
@@ -354,16 +380,23 @@ public class SunriseAndSunsetController {
         return "Deleted successfully!";
       }
     }
-    throw new NoHandlerFoundException(DELETE_METHOD,
-        "/sunInfo/country/{countryName}/coordinates/{coordinatesId}", new HttpHeaders());
+    throw new IllegalAccessException(COORDINATES_NOT_FOUND);
   }
 
+  /**
+   * Delete by date string.
+   *
+   * @param dateId the date id
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
+   */
   @DeleteMapping("/history/date/{dateId}")
-  public String deleteByDate(@PathVariable Long dateId) throws NoHandlerFoundException {
+  public String deleteByDate(@PathVariable Long dateId)
+      throws IllegalAccessException {
     logger.info("Processing delete request \"/history/date/{dateId}\"");
     Date removableDate = dateRepositoryService.findDateById(dateId);
     if (Objects.equals(removableDate, null)) {
-      throw new NoHandlerFoundException(DELETE_METHOD, "/history/date/{dateId}", new HttpHeaders());
+      throw new IllegalAccessException("Date not found");
     }
     List<Coordinates> coordinates = dateRepositoryService.getCoordinatesByDateId(dateId);
     for (Coordinates coordinate : coordinates) {
@@ -382,15 +415,21 @@ public class SunriseAndSunsetController {
     return "Deleted successfully";
   }
 
+  /**
+   * Delete by coordinates string.
+   *
+   * @param coordinatesId the coordinates id
+   * @return the string
+   * @throws IllegalAccessException the illegal access exception
+   */
   @DeleteMapping("/history/coordinates/{coordinatesId}")
   public String deleteByCoordinates(@PathVariable Long coordinatesId)
-      throws NoHandlerFoundException {
+      throws IllegalAccessException {
     logger.info("Processing delete request \"/history/coordinates/{coordinatesId}\"");
     Coordinates removableCoordinates =
         coordinatesRepositoryService.findCoordinatesById(coordinatesId);
     if (Objects.equals(removableCoordinates, null)) {
-      throw new NoHandlerFoundException(DELETE_METHOD, "/history/coordinates/{coordinatesId}",
-          new HttpHeaders());
+      throw new IllegalAccessException(COORDINATES_NOT_FOUND);
     }
     List<Date> dateList = coordinatesRepositoryService.getDateByCoordinatesId(coordinatesId);
     for (Date date : dateList) {
@@ -409,8 +448,4 @@ public class SunriseAndSunsetController {
     return "Deleted successfully";
   }
 
-  @DeleteMapping(value = "/**")
-  public void defaultDeleteMethod() {
-    throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-  }
 }
