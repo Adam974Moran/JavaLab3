@@ -2,47 +2,51 @@ package com.example.springbootlab1.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.persistence.*;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Date {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String coordinatesDate;
+  private String coordinatesDate;
+  @ManyToMany
+  @JoinTable(name = "date_coordinates",
+      joinColumns = @JoinColumn(name = "date_id"),
+      inverseJoinColumns = @JoinColumn(name = "coordinates_id"))
+  private Set<Coordinates> coordinates;
 
-    public Long getId() {
-        return id;
-    }
+  public Date() {
+    coordinates = new HashSet<>();
+  }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public String getCoordinatesDate() {
-        return coordinatesDate;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public void setCoordinatesDate(String date) {
-        this.coordinatesDate = date;
-    }
+  public String getCoordinatesDate() {
+    return coordinatesDate;
+  }
 
-    @ManyToMany
-    @JoinTable(name = "date_coordinates",
-            joinColumns = @JoinColumn(name = "date_id"),
-            inverseJoinColumns = @JoinColumn(name = "coordinates_id"))
-    private Set<Coordinates> coordinates;
+  public void setCoordinatesDate(String date) {
+    this.coordinatesDate = date;
+  }
 
-    public Date(){
-        coordinates = new HashSet<>();
-    }
-
-    public Set<Coordinates> getCoordinates() {
-        return coordinates;
-    }
+  public Set<Coordinates> getCoordinates() {
+    return coordinates;
+  }
 }
