@@ -2,6 +2,7 @@ package com.example.springbootlab1.service;
 
 import com.example.springbootlab1.model.Coordinates;
 import com.example.springbootlab1.model.Country;
+import com.example.springbootlab1.repository.CoordinatesRepository;
 import com.example.springbootlab1.repository.CountryRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -13,14 +14,18 @@ import org.springframework.stereotype.Service;
 public class CountryRepositoryServiceImplementor implements CountryRepositoryService {
 
   private final CountryRepository countryRepository;
+  private final CoordinatesRepository coordinatesRepository;
 
   /**
    * Instantiates a new Country repository service implementor.
    *
-   * @param countryRepository the country repository
+   * @param countryRepository     the country repository
+   * @param coordinatesRepository the coordinates repository
    */
-  public CountryRepositoryServiceImplementor(CountryRepository countryRepository) {
+  public CountryRepositoryServiceImplementor(CountryRepository countryRepository,
+                                             CoordinatesRepository coordinatesRepository) {
     this.countryRepository = countryRepository;
+    this.coordinatesRepository = coordinatesRepository;
   }
 
   @Override
@@ -46,5 +51,23 @@ public class CountryRepositoryServiceImplementor implements CountryRepositorySer
   @Override
   public List<Coordinates> getCoordinatesByCountryName(String countryName) {
     return countryRepository.getCoordinatesByCountryName(countryName);
+  }
+
+  @Override
+  public Country saveCountryWithCoordinates(Country country) {
+    Country savedCountry = countryRepository.findByCountryName(country.getCountryName());
+    if (savedCountry != null) {
+      return null;
+    }
+    countryRepository.save(country);
+    // Сохраняем координаты, связанные с страной, используя Stream API
+    List<Coordinates> savedCoordinates = country.getCoordinates().stream()
+        .map(coordinate -> {
+          coordinate.setCountry(country); // Устанавливаем страну для каждой координаты
+          return coordinatesRepository.save(coordinate); // Сохраняем каждую координату
+        })
+        .toList(); // Преобразуем поток в список
+    country.setCoordinates(savedCoordinates);// Обновляем список координат в стране
+    return country;
   }
 }

@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.util.Set;
+import java.util.List;
 
 /**
  * The type Country.
@@ -19,7 +19,7 @@ public class Country {
   private String countryName;
   @JsonManagedReference
   @OneToMany(mappedBy = "country")
-  private Set<Coordinates> coordinates;
+  private List<Coordinates> coordinates;
 
   /**
    * Gets id.
@@ -62,7 +62,16 @@ public class Country {
    *
    * @return the coordinates
    */
-  public Set<Coordinates> getCoordinates() {
+  public List<Coordinates> getCoordinates() {
     return coordinates;
+  }
+
+  /**
+   * Sets coordinates.
+   *
+   * @param coordinates the coordinates
+   */
+  public void setCoordinates(List<Coordinates> coordinates) {
+    this.coordinates = coordinates;
   }
 }

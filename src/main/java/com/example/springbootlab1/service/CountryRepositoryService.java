@@ -46,4 +46,6 @@ public interface CountryRepositoryService {
    * @return the coordinates by country name
    */
   List<Coordinates> getCoordinatesByCountryName(String countryName);
+
+  Country saveCountryWithCoordinates(Country country);
 }

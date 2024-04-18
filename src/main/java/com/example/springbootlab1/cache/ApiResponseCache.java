@@ -33,7 +33,7 @@ public class ApiResponseCache {
   /**
    * Update cache.
    */
-  @Scheduled(fixedRate = 5000)
+  @Scheduled(fixedRate = 300000) //5 минут
   public void updateCache() {
     RestTemplate restTemplate = new RestTemplate();
     for (String key : cache.keySet()) {
@@ -57,7 +57,7 @@ public class ApiResponseCache {
    * Gets from cache.
    *
    * @param key the key
-   * @return the from cache
+   * @return data from cache
    */
   public String getFromCache(String key) {
     return cache.get(key);

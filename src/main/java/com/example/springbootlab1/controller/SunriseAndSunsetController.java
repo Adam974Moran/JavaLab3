@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,7 +43,7 @@ public class SunriseAndSunsetController {
    * Instantiates a new Sunrise and sunset controller.
    *
    * @param countryRepositoryService     the country repository service
-   * @param coordinatesRepositoryService the coordinates repository service
+   * @param coordinatesRepositoryService the coordinates' repository service
    * @param dateRepositoryService        the date repository service
    */
   public SunriseAndSunsetController(CountryRepositoryService countryRepositoryService,
@@ -84,6 +85,22 @@ public class SunriseAndSunsetController {
     coordinatesRepositoryService.save(coordinates);
     return "Created successfully!";
   }
+
+
+  /**
+   * Bulk country insert response entity.
+   *
+   * @param countries the countries
+   * @return the response entity
+   */
+  @PostMapping("/sunInfo/severalCountries")
+  public ResponseEntity<String> bulkCountryInsert(@RequestBody List<Country> countries) {
+    for (Country country : countries) {
+      countryRepositoryService.saveCountryWithCoordinates(country);
+    }
+    return ResponseEntity.ok("Country has been saved");
+  }
+
 
   /**
    * Gets sunrise and sunset info.
@@ -192,7 +209,7 @@ public class SunriseAndSunsetController {
   }
 
   /**
-   * Gets all countries info.
+   * Gets all countries' info.
    *
    * @return the all countries info
    */
@@ -265,7 +282,7 @@ public class SunriseAndSunsetController {
    * @return the string
    * @throws IllegalAccessException the illegal access exception
    */
-  //PUT
+//PUT
   @PutMapping("/country/{countryName}/{newCountryName}")
   public String updateCountryName(@PathVariable String countryName,
                                   @PathVariable String newCountryName)
@@ -339,7 +356,7 @@ public class SunriseAndSunsetController {
    * @return the string
    * @throws IllegalAccessException the illegal access exception
    */
-  //DELETE
+//DELETE
   @DeleteMapping("/sunInfo/country/{countryName}")
   public String deleteCoordinates(@PathVariable String countryName)
       throws IllegalAccessException {
