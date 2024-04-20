@@ -22,6 +22,7 @@ public class ApiResponseCache {
   private static final int MAX_AMOUNT_OF_ELEMENTS = 3;
   private static final Logger logger = LoggerFactory.getLogger(ApiResponseCache.class);
 
+
   private final Map<String, String> cache = new LinkedHashMap<>() {
     @Override
     protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {

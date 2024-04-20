@@ -123,6 +123,10 @@ public class Coordinates {
     return date;
   }
 
+  public void setDates(Set<Date> singletonList) {
+    this.date = singletonList;
+  }
+
   /**
    * Check id boolean.
    *
@@ -132,6 +136,4 @@ public class Coordinates {
   public boolean checkId(Long id) {
     return Objects.equals(this.id, id);
   }
-
-
 }

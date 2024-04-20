@@ -3,6 +3,7 @@ package com.example.springbootlab1.service;
 import com.example.springbootlab1.model.Coordinates;
 import com.example.springbootlab1.model.Date;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 /**
@@ -53,5 +54,5 @@ public interface DateRepositoryService {
    * @param dateId the date id
    * @return the coordinates by date id
    */
-  List<Coordinates> getCoordinatesByDateId(Long dateId);
+  Set<Coordinates> getCoordinatesByDateId(Long dateId);
 }

@@ -13,6 +13,7 @@ import com.example.springbootlab1.service.WrongFormatException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -257,7 +258,7 @@ public class SunriseAndSunsetController {
     logger.info("Processing get request \"/sunInfo/date\"");
     StringBuilder result = new StringBuilder("{\"coordinatesDate\": \"").append(
         dateRepositoryService.findDateById(dateId).getCoordinatesDate()).append("\",\"result\":[");
-    List<Coordinates> coordinatesSet = dateRepositoryService.getCoordinatesByDateId(dateId);
+    Set<Coordinates> coordinatesSet = dateRepositoryService.getCoordinatesByDateId(dateId);
     for (Coordinates coordinates : coordinatesSet) {
       String url;
       try {
@@ -415,7 +416,7 @@ public class SunriseAndSunsetController {
     if (Objects.equals(removableDate, null)) {
       throw new IllegalAccessException("Date not found");
     }
-    List<Coordinates> coordinates = dateRepositoryService.getCoordinatesByDateId(dateId);
+    Set<Coordinates> coordinates = dateRepositoryService.getCoordinatesByDateId(dateId);
     for (Coordinates coordinate : coordinates) {
       if (coordinate.getDates().size() == 1 && Objects.equals(coordinate.getCountry(), null)) {
         removableDate.getCoordinates().remove(coordinate);

@@ -5,6 +5,7 @@ import com.example.springbootlab1.model.Coordinates;
 import com.example.springbootlab1.model.Date;
 import com.example.springbootlab1.repository.DateRepository;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,7 +51,7 @@ public class DateRepositoryImplementor implements DateRepositoryService {
   }
 
   @Override
-  public List<Coordinates> getCoordinatesByDateId(Long dateId) {
+  public Set<Coordinates> getCoordinatesByDateId(Long dateId) {
     return dateRepository.getCoordinatesByDateId(dateId);
   }
 }

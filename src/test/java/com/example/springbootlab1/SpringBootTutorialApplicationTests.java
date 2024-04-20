@@ -1,21 +1,20 @@
 package com.example.springbootlab1;
 
-import com.example.springbootlab1.service.CoordinatesRepositoryImplementor;
-import com.example.springbootlab1.service.CoordinatesRepositoryService;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class SpringBootTutorialApplicationTests {
 
+  @Autowired
+  private
 
-
-	@Test
-	void contextLoads() {
-		assertTrue(true, "This will always pass");
-	}
+  @Test
+  void contextLoads() {
+    assertTrue(true, "This will always pass");
+  }
 
 }

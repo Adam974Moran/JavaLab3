@@ -27,7 +27,7 @@ public class MyExceptionHandler extends ResponseStatusExceptionHandler {
 
   @Data
   @AllArgsConstructor
-  private static class ExceptionMessage {
+  static class ExceptionMessage {
     private String message;
   }
 }

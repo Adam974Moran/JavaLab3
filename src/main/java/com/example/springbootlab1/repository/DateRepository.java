@@ -2,7 +2,7 @@ package com.example.springbootlab1.repository;
 
 import com.example.springbootlab1.model.Coordinates;
 import com.example.springbootlab1.model.Date;
-import java.util.List;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -35,5 +35,5 @@ public interface DateRepository extends JpaRepository<Date, Long> {
    * @return the coordinates by date id
    */
   @Query("select d.coordinates from Date d where d.id = :dateId")
-  List<Coordinates> getCoordinatesByDateId(Long dateId);
+  Set<Coordinates> getCoordinatesByDateId(Long dateId);
 }

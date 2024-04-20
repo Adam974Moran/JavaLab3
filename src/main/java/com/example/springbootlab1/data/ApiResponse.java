@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
  * The type Api response.
  */
 public class ApiResponse {
-  private static final ApiResponseCache apiResponseCache = new ApiResponseCache();
+  static ApiResponseCache apiResponseCache = new ApiResponseCache();
 
   private ApiResponse() {
   }
