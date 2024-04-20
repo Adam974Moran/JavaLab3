@@ -9,9 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class SpringBootTutorialApplicationTests {
 
-  @Autowired
-  private
-
   @Test
   void contextLoads() {
     assertTrue(true, "This will always pass");
