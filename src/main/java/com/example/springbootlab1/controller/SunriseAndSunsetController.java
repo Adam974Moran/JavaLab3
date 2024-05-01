@@ -11,7 +11,6 @@ import com.example.springbootlab1.service.JsonFormatter;
 import com.example.springbootlab1.service.RequestsCounterService;
 import com.example.springbootlab1.service.UrlGenerator;
 import com.example.springbootlab1.service.WrongFormatException;
-import com.google.gson.JsonObject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +36,7 @@ public class SunriseAndSunsetController {
   private static final Logger logger = LoggerFactory.getLogger(SunriseAndSunsetController.class);
   private static final String COUNTRY_NOT_FOUND = "Country not found";
   private static final String COORDINATES_NOT_FOUND = "Coordinates not found";
+  private static final String AMOUNT_OF_REQUESTS = "amount of requests to service is {}";
 
   private final CountryRepositoryService countryRepositoryService;
   private final CoordinatesRepositoryService coordinatesRepositoryService;
@@ -76,6 +76,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing post request \"/sunInfo/country/countryName/coordinates\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
       country = new Country();
@@ -103,6 +105,8 @@ public class SunriseAndSunsetController {
   @PostMapping("/sunInfo/severalCountries")
   public ResponseEntity<String> bulkCountryInsert(@RequestBody List<Country> countries) {
     requestsCounterService.increment();
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     for (Country country : countries) {
       countryRepositoryService.saveCountryWithCoordinates(country);
     }
@@ -127,6 +131,8 @@ public class SunriseAndSunsetController {
       @RequestParam(value = "formatted", defaultValue = "null") String formatted) {
     requestsCounterService.increment();
     logger.info("Processing get request \"/sunInfo\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     String url;
     try {
       url = UrlGenerator.generateNewUrl(lat, lng, date, formatted);
@@ -195,6 +201,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing get request \"/sunInfo/country/{countryName}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     StringBuilder results = new StringBuilder("Results(");
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
@@ -227,6 +235,8 @@ public class SunriseAndSunsetController {
   public ResponseEntity<List<Country>> getAllCountriesInfo() {
     requestsCounterService.increment();
     logger.info("Processing get request \"/allCountriesInfo\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     return new ResponseEntity<>(countryRepositoryService.findAll(), HttpStatus.OK);
   }
 
@@ -239,6 +249,8 @@ public class SunriseAndSunsetController {
   public ResponseEntity<List<Date>> getHistoryByDate() {
     requestsCounterService.increment();
     logger.info("Processing get request \"/historyByDate\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     List<Date> datesList = dateRepositoryService.findAll();
     return new ResponseEntity<>(datesList, HttpStatus.OK);
   }
@@ -252,6 +264,8 @@ public class SunriseAndSunsetController {
   public ResponseEntity<List<Coordinates>> getHistoryByCoordinates() {
     requestsCounterService.increment();
     logger.info("Processing get request \"/historyByCoordinates\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
     return new ResponseEntity<>(coordinatesList, HttpStatus.OK);
   }
@@ -269,6 +283,8 @@ public class SunriseAndSunsetController {
       @RequestParam(value = "dateId", defaultValue = "null") Long dateId) {
     requestsCounterService.increment();
     logger.info("Processing get request \"/sunInfo/date\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     StringBuilder result = new StringBuilder("{\"coordinatesDate\": \"").append(
         dateRepositoryService.findDateById(dateId).getCoordinatesDate()).append("\",\"result\":[");
     Set<Coordinates> coordinatesSet = dateRepositoryService.getCoordinatesByDateId(dateId);
@@ -289,16 +305,6 @@ public class SunriseAndSunsetController {
   }
 
 
-  //ENDPOINT FOR REQUESTS COUNTER
-  @GetMapping("/getAmountOfRequests")
-  public ResponseEntity<String> getAmountOfRequests() {
-    requestsCounterService.increment();
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("count", requestsCounterService.getCount());
-    return ResponseEntity.ok(jsonObject.toString());
-  }
-
-
   /**
    * Update country name string.
    *
@@ -314,6 +320,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing put request \"/country/{countryName}/{newCountryName}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Country country = countryRepositoryService.findByCountryName(countryName);
     Country countryCheck = countryRepositoryService.findByCountryName(newCountryName);
     if (Objects.equals(country, null) || !Objects.equals(countryCheck, null)) {
@@ -341,6 +349,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing put request \"/coordinates/{coordinatesId}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Coordinates coordinates = coordinatesRepositoryService.findCoordinatesById(coordinatesId);
     if (Objects.equals(coordinates, null) || Objects.equals(lat, "null")
         || Objects.equals(lng, "null")) {
@@ -366,6 +376,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing put request \"/date/{dateId}/{newDateValue}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Date dateToUpdate = dateRepositoryService.findDateById(dateId);
     Date dateToCheck = dateRepositoryService.findByDate(newDateValue);
     if (Objects.equals(dateToUpdate, null) || !Objects.equals(dateToCheck, null)) {
@@ -390,6 +402,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing delete request \"/sunInfo/country/{countryName}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
       throw new IllegalAccessException(COUNTRY_NOT_FOUND);
@@ -415,6 +429,8 @@ public class SunriseAndSunsetController {
     requestsCounterService.increment();
     logger.info(
         "Processing delete request \"/sunInfo/country/{countryName}/coordinates/{coordinatesId}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
       throw new IllegalAccessException(COUNTRY_NOT_FOUND);
@@ -442,6 +458,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing delete request \"/history/date/{dateId}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Date removableDate = dateRepositoryService.findDateById(dateId);
     if (Objects.equals(removableDate, null)) {
       throw new IllegalAccessException("Date not found");
@@ -475,6 +493,8 @@ public class SunriseAndSunsetController {
       throws IllegalAccessException {
     requestsCounterService.increment();
     logger.info("Processing delete request \"/history/coordinates/{coordinatesId}\"");
+    int numberOfRequests = requestsCounterService.getCount();
+    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Coordinates removableCoordinates =
         coordinatesRepositoryService.findCoordinatesById(coordinatesId);
     if (Objects.equals(removableCoordinates, null)) {
