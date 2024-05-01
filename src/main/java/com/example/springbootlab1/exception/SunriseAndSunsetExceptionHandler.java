@@ -88,12 +88,25 @@ public class SunriseAndSunsetExceptionHandler {
         .body(new Message(errorMessage, e.getMessage()));
   }
 
+  /**
+   * The type Message.
+   */
   public record Message(String message, String description) {
 
+    /**
+     * Gets message.
+     *
+     * @return the message
+     */
     public String getMessage() {
       return message;
     }
 
+    /**
+     * Gets description.
+     *
+     * @return the description
+     */
     public String getDescription() {
       return description;
     }

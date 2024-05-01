@@ -60,14 +60,13 @@ public class CountryRepositoryServiceImplementor implements CountryRepositorySer
       return null;
     }
     countryRepository.save(country);
-    // Сохраняем координаты, связанные с страной, используя Stream API
     List<Coordinates> savedCoordinates = country.getCoordinates().stream()
         .map(coordinate -> {
-          coordinate.setCountry(country); // Устанавливаем страну для каждой координаты
-          return coordinatesRepository.save(coordinate); // Сохраняем каждую координату
+          coordinate.setCountry(country);
+          return coordinatesRepository.save(coordinate);
         })
-        .toList(); // Преобразуем поток в список
-    country.setCoordinates(savedCoordinates);// Обновляем список координат в стране
+        .toList();
+    country.setCoordinates(savedCoordinates);
     return country;
   }
 }
