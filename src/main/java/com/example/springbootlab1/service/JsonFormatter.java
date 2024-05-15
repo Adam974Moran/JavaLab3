@@ -18,7 +18,7 @@ public class JsonFormatter {
   public static String getFormattedJsonKeys(String jsonResponse) {
     Gson json = new Gson();
     SunriseAndSunsetKeys sunrise = json.fromJson(jsonResponse, SunriseAndSunsetKeys.class);
-    return "{\"sunrise\": \"" + sunrise.results.sunrise + "\", \"sunset\": \""
-        + sunrise.results.sunset + "\"}";
+    return "{\"sunrise\": \"" + sunrise.results.getSunrise() + "\", \"sunset\": \""
+        + sunrise.results.getSunset() + "\"}";
   }
 }

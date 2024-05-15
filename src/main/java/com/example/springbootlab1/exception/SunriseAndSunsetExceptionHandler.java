@@ -71,7 +71,7 @@ public class SunriseAndSunsetExceptionHandler {
       HttpRequestMethodNotSupportedException e) {
     String errorMessage = "Error 405: Method Not Supported";
     logger.error(errorMessage);
-    return ResponseEntity.status(e.getStatusCode()).body(new Message(errorMessage, e.getMessage()));
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Message(errorMessage, e.getMessage()));
   }
 
   /**

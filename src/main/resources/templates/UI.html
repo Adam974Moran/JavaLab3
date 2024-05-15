@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sunrise And Sunset</title>
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            border: none;
+            display: flex;
+        }
+
+        head {
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+
+        hr {
+            position: relative;
+            border-width: 2px;
+            border-color: blueviolet;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            z-index: 1;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #EDEBE7;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            height: 100vh;
+            width: 100%;
+        }
+
+        #header {
+            display: flex;
+            justify-content: center;
+            background-color: #613fff;
+            align-items: center;
+            height: 200px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        #hello {
+            color: indigo;
+            font-size: 30px;
+            font-family: "Times New Roman", sans-serif;
+            font-weight: bold;
+            position: relative;
+            z-index: 3;
+        }
+
+        #input-part {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+            z-index: 1;
+        }
+
+        #sun {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: #ffca00;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            margin-top: 20px;
+            z-index: 2;
+        }
+
+        .search-line {
+            display: flex;
+            position: relative;
+            justify-content: center;
+            align-items: center;
+            width: 260px;
+            height: 50px;
+            margin: 10px 10px;
+            z-index: 1;
+        }
+
+        .search-layer-1 {
+            position: absolute;
+            width: 250px;
+            height: 50px;
+            background-color: blueviolet;
+            border-radius: 10px;
+        }
+
+        .search-layer-2 {
+            position: absolute;
+            width: 240px;
+            height: 40px;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+        .input-line{
+            position: absolute;
+            width: 236px;
+            height: 38px;
+            background-color: transparent;
+            font-size: 20px;
+            border: 0;
+        }
+
+        #buttons {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+            z-index: 1;
+        }
+
+        .action-button {
+            position:  relative;
+            background-color: blueviolet;
+            height: 30px;
+            width: 100px;
+            font-size: 20px;
+            color: white;
+            border-radius: 15px;
+            margin-left: 10px;
+        }
+
+        .action-button-2{
+            position:  relative;
+            background-color: blueviolet;
+            height: 50px;
+            width: 300px;
+            font-size: 24px;
+            color: white;
+            border-radius: 15px;
+            margin-left: 10px;
+        }
+
+        .output-message{
+            font-size: 24px;
+            color: indigo;
+            margin-left: 10px;
+            font-weight: bold
+        }
+
+        .success-message{
+            font-size: 24px;
+            color: #008f00;
+            margin-left: 10px;
+            font-weight: bold
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <script>
+        function deleteCoordinates(coordinatesId){
+            window.location.href = 'http://localhost:8080/sunInfo/coordinates/delete' + '?coordinatesId=' + coordinatesId;
+        }
+        function deleteCountry(countryName){
+            window.location.href = 'http://localhost:8080/sunInfo/country/delete' + '?countryName=' + countryName;
+        }
+
+        function getAllCountryInfo(changeType, countryName, coordinatesId){
+            let url = 'http://localhost:8080/allCountriesInfo' + '?changeType=' + changeType;
+            if(countryName === 'null'){
+                url += '&countryName=null' + '&coordinatesId=' + coordinatesId;
+                window.location.href = url;
+            }
+            else if(coordinatesId === 'null'){
+                url += '&countryName=' + countryName + '&coordinatesId=null';
+                window.location.href = url;
+            }
+            else{
+                url += '&countryName=null&coordinatesId=null';
+                window.location.href = url;
+            }
+        }
+
+        function changeCountryName(oldCountryName, newCountryName){
+            if(!newCountryName){
+                newCountryName = 'null';
+            }
+            window.location.href = 'http://localhost:8080/country/change/' + oldCountryName + '/' + newCountryName + '/';
+        }
+
+        function changeCoordinates(coordinatesId, newLat, newLng){
+            window.location.href = 'http://localhost:8080/coordinates/change/'+ coordinatesId + '?lat=' + newLat + '&lng=' + newLng;
+        }
+    </script>
+
+    <div id="header">
+        <p id="hello">SUNRISE AND SUNSET</p>
+        <div id="sun"></div>
+    </div>
+    <hr>
+    <div id="input-part">
+        <div class="search-line">
+            <div class="search-layer-1"></div>
+            <div class="search-layer-2"></div>
+            <input type="text" class="input-line" name="get-countryName" placeholder="Country name:">
+        </div>
+        <div class="search-line">
+            <div class="search-layer-1"></div>
+            <div class="search-layer-2"></div>
+            <input type="text" class="input-line" name="get-date" placeholder="Date:">
+        </div>
+        <button class="action-button" id="get">GET</button>
+        <br>
+        <hr>
+        <br>
+        <div class="search-line">
+            <div class="search-layer-1"></div>
+            <div class="search-layer-2"></div>
+            <input type="text" class="input-line" name="post-countryName" placeholder="Country name:">
+        </div>
+        <div class="search-line">
+            <div class="search-layer-1"></div>
+            <div class="search-layer-2"></div>
+            <input type="text" class="input-line" name="post-lat" placeholder="Latitude:">
+        </div>
+        <div class="search-line">
+            <div class="search-layer-1"></div>
+            <div class="search-layer-2"></div>
+            <input type="text" class="input-line" name="post-lng" placeholder="Longitude:">
+        </div>
+        <button class="action-button" id="post">CREATE</button>
+        <br>
+        <hr>
+    </div>
+    <div id="buttons">
+        <button class="action-button-2" onclick="getAllCountryInfo('changeType', 'null', 'null')">SAVED COUNTRIES</button>
+    </div>
+    <hr>
+    <div id="output-part">
+        <div th:if="${type == 'error'}">
+            <p style="color: red; font-size: 24px; margin-left: 10px; font-weight: bold" th:text="${message}"></p>
+        </div>
+        <div th:if="${type == 'type1'}">
+            <div th:each="coordinate, stat : ${coordinates}">
+                <p class="output-message">
+                    Latitude: <samp th:text="${coordinate.getLat()}"></samp>
+                    , Longitude: <samp th:text="${coordinate.getLng()}"></samp>
+                    | Sunrise: <samp th:text="${results[stat.index].sunrise}"></samp>
+                    , Sunset: <samp th:text="${results[stat.index].sunset}"></samp>
+                </p>
+            </div>
+        </div>
+        <div th:if="${type == 'type2'}">
+            <div th:each="country : ${countries}">
+                <samp class="output-message">
+                    <samp th:text="${country.getCountryName()}"></samp>:
+                </samp>
+                <br>
+                <div style="display: flex" th:if="${changeType == 'changeType'}">
+                    <button class="action-button" th:attr="name=${country.getCountryName()}" onclick="deleteCountry(this.name)">Delete</button>
+                    <button class="action-button" th:attr="name=${country.getCountryName()}" onclick="getAllCountryInfo('countryChange', this.name, 'null')">Change</button>
+                </div>
+                <div style="display: flex" th:if="${changeType == 'countryChange' && country.getCountryName() == countryName}">
+                    <div class="search-line">
+                        <div class="search-layer-1"></div>
+                        <div class="search-layer-2"></div>
+                        <input type="text" class="input-line" name="newCountryName" placeholder="New Country Name:">
+                    </div>
+                    <button class="action-button" th:attr="oldCountryName=${countryName}" id="country-okay">Okay</button>
+                </div>
+                <br>
+                <div th:each="coordinate : ${country.getCoordinates()}">
+                    <samp class="output-message" style="display: flex; margin-left: 30px">
+                        Latitude: <samp th:text="${coordinate.getLat()}"></samp>
+                        , Longitude: <samp th:text="${coordinate.getLng()}"></samp>
+                    </samp>
+
+                    <div th:if="${changeType == 'changeType'}">
+                        <button class="action-button" th:attr="id=${coordinate.getStringId()}" onclick="deleteCoordinates(this.id)">Delete</button>
+                        <button class="action-button" th:attr="id=${coordinate.getStringId()}" onclick="getAllCountryInfo('coordinatesChange', 'null', this.id)">Change</button>
+                    </div>
+                    <div  style="display: flex" th:if="${changeType == 'coordinatesChange' && coordinate.getStringId() == coordinatesId}">
+                        <br>
+                        <div class="search-line">
+                            <div class="search-layer-1"></div>
+                            <div class="search-layer-2"></div>
+                            <input type="text" class="input-line" name="newLat" placeholder="New Latitude:">
+                        </div>
+                        <div class="search-line">
+                            <div class="search-layer-1"></div>
+                            <div class="search-layer-2"></div>
+                            <input type="text" class="input-line" name="newLng" placeholder="New Longitude:">
+                        </div>
+                        <br>
+                        <button class="action-button"  th:attr="coordinatesId=${coordinatesId}" id="coordinates-okay">Okay</button>
+                    </div>
+
+                    <br>
+                </div>
+                <br>
+            </div>
+        </div>
+        <div th:if="${type == 'success-message'}">
+            <p class="success-message" th:text="${message}"></p>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        console.log('Script loaded');
+        $(document).ready(function() {
+            $('#get').click(function() {
+                callEndpoint('http://localhost:8080/sunInfo/country/', $('input[name="get-countryName"]').val(), null, null, $('input[name="get-date"]').val());
+            });
+
+            $('#country-okay').click(function(){
+                changeCountryName(document.getElementById('country-okay').getAttribute('oldCountryName'), $('input[name="newCountryName"]').val());
+            })
+
+            $('#coordinates-okay').click(function(){
+                changeCoordinates(document.getElementById('coordinates-okay').getAttribute('coordinatesId'), $('input[name="newLat"]').val(), $('input[name="newLng"]').val());
+            })
+
+            $('#post').click(function() {
+                callEndpoint('http://localhost:8080/sunInfo/country/add', $('input[name="post-countryName"]').val(), $('input[name="post-lat"]').val(), $('input[name="post-lng"]').val(), null);
+            });
+
+
+
+            function callEndpoint(endpoint, countryName, lat, lng, date) {
+                let url = endpoint;
+                let ammOfParam = 0;
+                if(countryName){
+                    url += '?countryName=' + countryName;
+                    ammOfParam++;
+                }
+                if(lat){
+                    if(ammOfParam === 0){
+                        url += '?';
+                    }
+                    else{
+                        url += '&';
+                    }
+                    url += 'lat=' + lat;
+                    ammOfParam++;
+                }
+                if(lng){
+                    if(ammOfParam === 0){
+                        url += '?';
+                    }
+                    else{
+                        url += '&';
+                    }
+                    url += 'lng=' + lng;
+                    ammOfParam++;
+                }
+                if(date){
+                    if(ammOfParam === 0){
+                        url += '?';
+                    }
+                    else{
+                        url += '&';
+                    }
+                    url += 'date=' + date;
+                    ammOfParam++;
+                }
+                console.log(url);
+                window.location.href = url;
+            }
+        });
+    </script>
+</body>
+</html>

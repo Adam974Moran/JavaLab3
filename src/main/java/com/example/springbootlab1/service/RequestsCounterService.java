@@ -5,13 +5,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RequestsCounterService {
-  private final AtomicInteger count = new AtomicInteger(0);
+  private RequestsCounterService(){}
+  private static final AtomicInteger count = new AtomicInteger(0);
 
-  public void increment(){
+  public static void increment(){
     count.incrementAndGet();
   }
 
-  public int getCount() {
+  public static int getCount() {
     return count.get();
   }
 }

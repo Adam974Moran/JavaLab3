@@ -51,6 +51,8 @@ public class Coordinates {
     return id;
   }
 
+  public String getStringId() { return this.id.toString();}
+
   /**
    * Sets id.
    *

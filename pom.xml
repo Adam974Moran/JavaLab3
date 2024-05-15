@@ -5,14 +5,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>3.2.4</version>
+        <relativePath/>
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>spring-boot-tutorial</artifactId>
+    <artifactId>sunrise_and_sunset_application</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-tutorial</name>
-    <description>spring-boot-tutorial</description>
+    <name>sunrise_and_sunset_application</name>
+    <description>sunrise_and_sunset_application</description>
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <java.version>18</java.version>
@@ -24,6 +24,20 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>2.5.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.4.4.Final</version>
+        </dependency>
+
+        <!-- Jakarta EE -->
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>8.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

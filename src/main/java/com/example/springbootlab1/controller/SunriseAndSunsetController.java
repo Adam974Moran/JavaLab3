@@ -9,16 +9,21 @@ import com.example.springbootlab1.service.CountryRepositoryService;
 import com.example.springbootlab1.service.DateRepositoryService;
 import com.example.springbootlab1.service.JsonFormatter;
 import com.example.springbootlab1.service.RequestsCounterService;
+import com.example.springbootlab1.service.Results;
 import com.example.springbootlab1.service.UrlGenerator;
 import com.example.springbootlab1.service.WrongFormatException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,22 +31,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The type Sunrise and sunset controller.
  */
-@RestController
+@Controller
 public class SunriseAndSunsetController {
   private static final Logger logger = LoggerFactory.getLogger(SunriseAndSunsetController.class);
   private static final String COUNTRY_NOT_FOUND = "Country not found";
   private static final String COORDINATES_NOT_FOUND = "Coordinates not found";
   private static final String AMOUNT_OF_REQUESTS = "amount of requests to service is {}";
+  private static final String MESSAGE = "message";
+  private static final String SUCCESS_MESSAGE = "success-message";
+  private static final String ERROR = "error";
+
 
   private final CountryRepositoryService countryRepositoryService;
   private final CoordinatesRepositoryService coordinatesRepositoryService;
   private final DateRepositoryService dateRepositoryService;
-  private final RequestsCounterService requestsCounterService;
 
   /**
    * Instantiates a new Sunrise and sunset controller.
@@ -52,12 +59,11 @@ public class SunriseAndSunsetController {
    */
   public SunriseAndSunsetController(CountryRepositoryService countryRepositoryService,
                                     CoordinatesRepositoryService coordinatesRepositoryService,
-                                    DateRepositoryService dateRepositoryService,
-                                    RequestsCounterService requestsCounterService) {
+                                    DateRepositoryService dateRepositoryService
+  ) {
     this.countryRepositoryService = countryRepositoryService;
     this.coordinatesRepositoryService = coordinatesRepositoryService;
     this.dateRepositoryService = dateRepositoryService;
-    this.requestsCounterService = requestsCounterService;
   }
 
   /**
@@ -67,32 +73,44 @@ public class SunriseAndSunsetController {
    * @param lat         the lat
    * @param lng         the lng
    * @return the string
-   * @throws IllegalAccessException the illegal access exception
    */
-  @PostMapping("/sunInfo/country/{countryName}/coordinates")
-  public String addCoordinates(@PathVariable String countryName,
+  @GetMapping("/sunInfo/country/add")
+  public String addCoordinates(@RequestParam(value = "countryName", defaultValue = "null") String countryName,
                                @RequestParam(value = "lat", defaultValue = "null") String lat,
-                               @RequestParam(value = "lng", defaultValue = "null") String lng)
-      throws IllegalAccessException {
-    requestsCounterService.increment();
+                               @RequestParam(value = "lng", defaultValue = "null") String lng, Model model) {
+    RequestsCounterService.increment();
     logger.info("Processing post request \"/sunInfo/country/countryName/coordinates\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
+    if(Objects.equals(countryName, "null") || Objects.equals(lat, "null") || Objects.equals(lng, "null")){
+      model.addAttribute("type", ERROR);
+      model.addAttribute(MESSAGE, "All parameters except \"date\" are obligatory here!");
+      return "UI";
+    }
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
       country = new Country();
       country.setCountryName(countryName);
       countryRepositoryService.save(country);
     }
-    if (Objects.equals(lng, "null") || Objects.equals(lat, "null")) {
-      throw new IllegalAccessException(COORDINATES_NOT_FOUND);
+    List<Coordinates> coordinatesList = country.getCoordinates();
+    if(coordinatesList != null) {
+      for (Coordinates coordinates_group : coordinatesList) {
+        if (Objects.equals(coordinates_group.getLng(), lng) ||
+            Objects.equals(coordinates_group.getLat(), lat)) {
+          model.addAttribute("type", ERROR);
+          model.addAttribute(MESSAGE, "This coordinates are already in use!");
+          return "UI";
+        }
+      }
     }
+
     Coordinates coordinates = new Coordinates();
     coordinates.setLat(lat);
     coordinates.setLng(lng);
     coordinates.setCountry(country);
     coordinatesRepositoryService.save(coordinates);
-    return "Created successfully!";
+    model.addAttribute("type", SUCCESS_MESSAGE);
+    model.addAttribute(MESSAGE, "Created successfully!");
+    return "UI";
   }
 
 
@@ -104,9 +122,7 @@ public class SunriseAndSunsetController {
    */
   @PostMapping("/sunInfo/severalCountries")
   public ResponseEntity<String> bulkCountryInsert(@RequestBody List<Country> countries) {
-    requestsCounterService.increment();
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
+    RequestsCounterService.increment();
     for (Country country : countries) {
       countryRepositoryService.saveCountryWithCoordinates(country);
     }
@@ -123,16 +139,14 @@ public class SunriseAndSunsetController {
    * @param formatted the formatted
    * @return the sunrise and sunset info
    */
-  @GetMapping(value = "/sunInfo", produces = "application/json")
+  @GetMapping(value = "/sunInfo/api", produces = "application/json")
   public String getSunriseAndSunsetInfo(
       @RequestParam(value = "lat", defaultValue = "null") String lat,
       @RequestParam(value = "lng", defaultValue = "null") String lng,
       @RequestParam(value = "date", defaultValue = "null") String date,
       @RequestParam(value = "formatted", defaultValue = "null") String formatted) {
-    requestsCounterService.increment();
+    RequestsCounterService.increment();
     logger.info("Processing get request \"/sunInfo\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     String url;
     try {
       url = UrlGenerator.generateNewUrl(lat, lng, date, formatted);
@@ -192,27 +206,28 @@ public class SunriseAndSunsetController {
    * @param countryName the country name
    * @param date        the date
    * @return the coordinates by country
-   * @throws IllegalAccessException the illegal access exception
    */
-  @GetMapping("/sunInfo/country/{countryName}")
-  public String getCoordinatesByCountry(@PathVariable String countryName,
+  @GetMapping("/sunInfo/country/")
+  public String getCoordinatesByCountry(@RequestParam(value = "countryName", defaultValue = "null") String countryName,
                                         @RequestParam(value = "date", defaultValue = "null")
-                                        String date)
-      throws IllegalAccessException {
-    requestsCounterService.increment();
+                                        String date, Model model) {
+    if(Objects.equals(countryName, "null")){
+      model.addAttribute("type", ERROR);
+      model.addAttribute(MESSAGE, "Parameter \"countryName\" is obligatory");
+      return "UI";
+    }
+    RequestsCounterService.increment();
     logger.info("Processing get request \"/sunInfo/country/{countryName}\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
-    StringBuilder results = new StringBuilder("Results(");
     Country country = countryRepositoryService.findByCountryName(countryName);
     if (country == null) {
-
-      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
+      model.addAttribute("type", ERROR);
+      model.addAttribute(MESSAGE, COUNTRY_NOT_FOUND);
+      return "UI";
     }
-    results.append(country.getCountryName()).append("):\n");
 
     List<Coordinates> coordinatesList =
         countryRepositoryService.getCoordinatesByCountryName(countryName);
+    List<Results> resultsList = new ArrayList<>();
     for (Coordinates coordinate : coordinatesList) {
       String url;
       try {
@@ -220,10 +235,24 @@ public class SunriseAndSunsetController {
       } catch (WrongFormatException w) {
         return w.getExceptionMessage();
       }
-      results.append(JsonFormatter.getFormattedJsonKeys(ApiResponse.getJsonInString(url)))
-          .append("\n");
+
+      try {
+        JSONObject jsonObject =
+            new JSONObject(JsonFormatter.getFormattedJsonKeys(ApiResponse.getJsonInString(url)));
+        Results newResults = new Results();
+        newResults.setSunrise(jsonObject.getString("sunrise"));
+        newResults.setSunset(jsonObject.getString("sunset"));
+        resultsList.add(newResults);
+
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
     }
-    return results.toString();
+    model.addAttribute("results", resultsList);
+    model.addAttribute("coordinates", coordinatesList);
+    model.addAttribute("type", "type1");
+    return "UI";
   }
 
   /**
@@ -232,12 +261,17 @@ public class SunriseAndSunsetController {
    * @return the all countries info
    */
   @GetMapping(value = "/allCountriesInfo", produces = "application/json")
-  public ResponseEntity<List<Country>> getAllCountriesInfo() {
-    requestsCounterService.increment();
+  public String getAllCountriesInfo(@RequestParam String changeType, @RequestParam String countryName, @RequestParam String coordinatesId, Model model) {
     logger.info("Processing get request \"/allCountriesInfo\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
-    return new ResponseEntity<>(countryRepositoryService.findAll(), HttpStatus.OK);
+    RequestsCounterService.increment();
+    logger.info(AMOUNT_OF_REQUESTS, RequestsCounterService.getCount());
+    logger.info(countryName);
+    model.addAttribute("changeType", changeType);
+    model.addAttribute("countryName", countryName);
+    model.addAttribute("coordinatesId", coordinatesId);
+    model.addAttribute("type", "type2");
+    model.addAttribute("countries", countryRepositoryService.findAll());
+    return "UI";
   }
 
   /**
@@ -247,10 +281,8 @@ public class SunriseAndSunsetController {
    */
   @GetMapping(value = "/historyByDate", produces = "application/json")
   public ResponseEntity<List<Date>> getHistoryByDate() {
-    requestsCounterService.increment();
+    RequestsCounterService.increment();
     logger.info("Processing get request \"/historyByDate\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     List<Date> datesList = dateRepositoryService.findAll();
     return new ResponseEntity<>(datesList, HttpStatus.OK);
   }
@@ -262,10 +294,8 @@ public class SunriseAndSunsetController {
    */
   @GetMapping(value = "/historyByCoordinates", produces = "application/json")
   public ResponseEntity<List<Coordinates>> getHistoryByCoordinates() {
-    requestsCounterService.increment();
+    RequestsCounterService.increment();
     logger.info("Processing get request \"/historyByCoordinates\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     List<Coordinates> coordinatesList = coordinatesRepositoryService.findAll();
     return new ResponseEntity<>(coordinatesList, HttpStatus.OK);
   }
@@ -281,10 +311,8 @@ public class SunriseAndSunsetController {
   @GetMapping(value = "/sunInfo/date", produces = "application/json")
   public Object getSunsetAndSunriseInformationByDate(
       @RequestParam(value = "dateId", defaultValue = "null") Long dateId) {
-    requestsCounterService.increment();
+    RequestsCounterService.increment();
     logger.info("Processing get request \"/sunInfo/date\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     StringBuilder result = new StringBuilder("{\"coordinatesDate\": \"").append(
         dateRepositoryService.findDateById(dateId).getCoordinatesDate()).append("\",\"result\":[");
     Set<Coordinates> coordinatesSet = dateRepositoryService.getCoordinatesByDateId(dateId);
@@ -314,22 +342,29 @@ public class SunriseAndSunsetController {
    * @throws IllegalAccessException the illegal access exception
    */
   //PUT
-  @PutMapping("/country/{countryName}/{newCountryName}")
+  @GetMapping("/country/change/{countryName}/{newCountryName}/")
   public String updateCountryName(@PathVariable String countryName,
-                                  @PathVariable String newCountryName)
-      throws IllegalAccessException {
-    requestsCounterService.increment();
+                                  @PathVariable String newCountryName, Model model) {
+    RequestsCounterService.increment();
     logger.info("Processing put request \"/country/{countryName}/{newCountryName}\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Country country = countryRepositoryService.findByCountryName(countryName);
     Country countryCheck = countryRepositoryService.findByCountryName(newCountryName);
-    if (Objects.equals(country, null) || !Objects.equals(countryCheck, null)) {
-      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
-    } else {
+    if (Objects.equals(newCountryName, "null")) {
+      model.addAttribute(MESSAGE, "New country name is obligatory!");
+      model.addAttribute("type", ERROR);
+      return "UI";
+    }
+    else if(!Objects.equals(countryCheck, null)){
+      model.addAttribute(MESSAGE, "Country name is already in use!");
+      model.addAttribute("type", ERROR);
+      return "UI";
+    }
+    else {
       country.setCountryName(newCountryName);
       countryRepositoryService.save(country);
-      return "Country name updated successfully!";
+      model.addAttribute(MESSAGE, "Country successfully changed!");
+      model.addAttribute("type", SUCCESS_MESSAGE);
+      return "UI";
     }
   }
 
@@ -342,25 +377,27 @@ public class SunriseAndSunsetController {
    * @return the string
    * @throws IllegalAccessException the illegal access exception
    */
-  @PutMapping("/coordinates/{coordinatesId}")
+  @GetMapping("/coordinates/change/{coordinatesId}")
   public String updateCountryName(@PathVariable Long coordinatesId,
                                   @RequestParam(value = "lat", defaultValue = "null") String lat,
-                                  @RequestParam(value = "lng", defaultValue = "null") String lng)
-      throws IllegalAccessException {
-    requestsCounterService.increment();
+                                  @RequestParam(value = "lng", defaultValue = "null") String lng, Model model){
+    RequestsCounterService.increment();
     logger.info("Processing put request \"/coordinates/{coordinatesId}\"");
-    int numberOfRequests = requestsCounterService.getCount();
+    int numberOfRequests = RequestsCounterService.getCount();
     logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Coordinates coordinates = coordinatesRepositoryService.findCoordinatesById(coordinatesId);
-    if (Objects.equals(coordinates, null) || Objects.equals(lat, "null")
-        || Objects.equals(lng, "null")) {
-      throw new IllegalAccessException(COORDINATES_NOT_FOUND);
-    } else {
+    if (Objects.equals(lat, "null") || Objects.equals(lng, "null")) {
+      model.addAttribute(MESSAGE, "Latitude and longitude are both obligatory!");
+      model.addAttribute("type", ERROR);
+    }
+    else {
       coordinates.setLat(lat);
       coordinates.setLng(lng);
       coordinatesRepositoryService.save(coordinates);
-      return "Coordinates updated successfully!";
+      model.addAttribute(MESSAGE, "Coordinates successfully changed!");
+      model.addAttribute("type", SUCCESS_MESSAGE);
     }
+    return "UI";
   }
 
   /**
@@ -374,10 +411,8 @@ public class SunriseAndSunsetController {
   @PutMapping("/date/{dateId}/{newDateValue}")
   public String updateDateValue(@PathVariable Long dateId, @PathVariable String newDateValue)
       throws IllegalAccessException {
-    requestsCounterService.increment();
+    RequestsCounterService.increment();
     logger.info("Processing put request \"/date/{dateId}/{newDateValue}\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Date dateToUpdate = dateRepositoryService.findDateById(dateId);
     Date dateToCheck = dateRepositoryService.findByDate(newDateValue);
     if (Objects.equals(dateToUpdate, null) || !Objects.equals(dateToCheck, null)) {
@@ -394,56 +429,42 @@ public class SunriseAndSunsetController {
    *
    * @param countryName the country name
    * @return the string
-   * @throws IllegalAccessException the illegal access exception
    */
   //DELETE
-  @DeleteMapping("/sunInfo/country/{countryName}")
-  public String deleteCoordinates(@PathVariable String countryName)
-      throws IllegalAccessException {
-    requestsCounterService.increment();
-    logger.info("Processing delete request \"/sunInfo/country/{countryName}\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
-    Country country = countryRepositoryService.findByCountryName(countryName);
-    if (country == null) {
-      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
-    }
-    List<Coordinates> coordinates =
-        countryRepositoryService.getCoordinatesByCountryName(countryName);
-    coordinatesRepositoryService.deleteAll(coordinates);
-    countryRepositoryService.delete(country);
-    return "Deleted successfully!";
+  @GetMapping("/sunInfo/country/delete")
+  public String deleteCountry(@RequestParam(value = "countryName", defaultValue = "null") String countryName, Model model) {
+      RequestsCounterService.increment();
+      logger.info("Processing delete request \"/sunInfo/country/{countryName}\"");
+      Country country = countryRepositoryService.findByCountryName(countryName);
+      if (country == null) {
+        model.addAttribute("type", ERROR);
+        model.addAttribute(MESSAGE, COUNTRY_NOT_FOUND);
+        return "UI";
+      }
+      List<Coordinates> coordinates =
+          countryRepositoryService.getCoordinatesByCountryName(countryName);
+      coordinatesRepositoryService.deleteAll(coordinates);
+      countryRepositoryService.delete(country);
+    model.addAttribute("type", SUCCESS_MESSAGE);
+    model.addAttribute(MESSAGE, "Deleted successfully!");
+    return "UI";
   }
 
-  /**
-   * Delete coordinates string.
-   *
-   * @param countryName   the country name
-   * @param coordinatesId the coordinates id
-   * @return the string
-   * @throws IllegalAccessException the illegal access exception
-   */
-  @DeleteMapping("/sunInfo/country/{countryName}/coordinates/{coordinatesId}")
-  public String deleteCoordinates(@PathVariable String countryName,
-                                  @PathVariable Long coordinatesId) throws IllegalAccessException {
-    requestsCounterService.increment();
-    logger.info(
-        "Processing delete request \"/sunInfo/country/{countryName}/coordinates/{coordinatesId}\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
-    Country country = countryRepositoryService.findByCountryName(countryName);
-    if (country == null) {
-      throw new IllegalAccessException(COUNTRY_NOT_FOUND);
-    }
+  @GetMapping("/sunInfo/coordinates/delete")
+  public String deleteCoordinates(@RequestParam(value = "coordinatesId", defaultValue = "null") Long coordinatesId, Model model){
     List<Coordinates> coordinates =
-        countryRepositoryService.getCoordinatesByCountryName(countryName);
+        coordinatesRepositoryService.findAll();
     for (Coordinates coordinate : coordinates) {
       if (coordinate.checkId(coordinatesId)) {
         coordinatesRepositoryService.deleteById(coordinatesId);
-        return "Deleted successfully!";
+        model.addAttribute("type", SUCCESS_MESSAGE);
+        model.addAttribute(MESSAGE, "Deleted successfully!");
+        return "UI";
       }
     }
-    throw new IllegalAccessException(COORDINATES_NOT_FOUND);
+    model.addAttribute("type", ERROR);
+    model.addAttribute(MESSAGE, "Deletion failed!");
+    return "UI";
   }
 
   /**
@@ -456,10 +477,8 @@ public class SunriseAndSunsetController {
   @DeleteMapping("/history/date/{dateId}")
   public String deleteByDate(@PathVariable Long dateId)
       throws IllegalAccessException {
-    requestsCounterService.increment();
+    RequestsCounterService.increment();
     logger.info("Processing delete request \"/history/date/{dateId}\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Date removableDate = dateRepositoryService.findDateById(dateId);
     if (Objects.equals(removableDate, null)) {
       throw new IllegalAccessException("Date not found");
@@ -491,10 +510,8 @@ public class SunriseAndSunsetController {
   @DeleteMapping("/history/coordinates/{coordinatesId}")
   public String deleteByCoordinates(@PathVariable Long coordinatesId)
       throws IllegalAccessException {
-    requestsCounterService.increment();
+    RequestsCounterService.increment();
     logger.info("Processing delete request \"/history/coordinates/{coordinatesId}\"");
-    int numberOfRequests = requestsCounterService.getCount();
-    logger.info(AMOUNT_OF_REQUESTS, numberOfRequests);
     Coordinates removableCoordinates =
         coordinatesRepositoryService.findCoordinatesById(coordinatesId);
     if (Objects.equals(removableCoordinates, null)) {
