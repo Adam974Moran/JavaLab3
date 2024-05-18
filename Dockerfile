@@ -1,6 +1,3 @@
-FROM mysql:8.0
-ENV MYSQL_DATASOURCE
-
 FROM maven:3.9.6
 COPY src /home/app/src
 COPY pom.xml /home/app
