@@ -8,7 +8,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * The type Sunrise and sunset exception handler.
@@ -52,13 +51,13 @@ public class SunriseAndSunsetExceptionHandler {
    * @param e the e
    * @return the response entity
    */
-  @ExceptionHandler({NoResourceFoundException.class})
-  public ResponseEntity<Message> noResourceFoundException(NoResourceFoundException e) {
-    String errorMessage = "ERROR 404: No Resource Found";
-    logger.error(errorMessage);
-    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new Message(errorMessage, e.getMessage()));
-  }
+//  @ExceptionHandler({NoResourceFoundException.class})
+//  public ResponseEntity<Message> noResourceFoundException(NoResourceFoundException e) {
+//    String errorMessage = "ERROR 404: No Resource Found";
+//    logger.error(errorMessage);
+//    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//        .body(new Message(errorMessage, e.getMessage()));
+//  }
 
   /**
    * Handle method not supported exception response entity.
