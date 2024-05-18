@@ -172,14 +172,14 @@
 <body>
     <script>
         function deleteCoordinates(coordinatesId){
-            window.location.href = 'http://localhost:8080/sunInfo/coordinates/delete' + '?coordinatesId=' + coordinatesId;
+            window.location.href = 'https://javalab3-1.onrender.com/sunInfo/coordinates/delete' + '?coordinatesId=' + coordinatesId;
         }
         function deleteCountry(countryName){
-            window.location.href = 'http://localhost:8080/sunInfo/country/delete' + '?countryName=' + countryName;
+            window.location.href = 'https://javalab3-1.onrender.com/sunInfo/country/delete' + '?countryName=' + countryName;
         }
 
         function getAllCountryInfo(changeType, countryName, coordinatesId){
-            let url = 'http://localhost:8080/allCountriesInfo' + '?changeType=' + changeType;
+            let url = 'https://javalab3-1.onrender.com/allCountriesInfo' + '?changeType=' + changeType;
             if(countryName === 'null'){
                 url += '&countryName=null' + '&coordinatesId=' + coordinatesId;
                 window.location.href = url;
@@ -198,11 +198,11 @@
             if(!newCountryName){
                 newCountryName = 'null';
             }
-            window.location.href = 'http://localhost:8080/country/change/' + oldCountryName + '/' + newCountryName + '/';
+            window.location.href = 'https://javalab3-1.onrender.com/country/change/' + oldCountryName + '/' + newCountryName + '/';
         }
 
         function changeCoordinates(coordinatesId, newLat, newLng){
-            window.location.href = 'http://localhost:8080/coordinates/change/'+ coordinatesId + '?lat=' + newLat + '&lng=' + newLng;
+            window.location.href = 'https://javalab3-1.onrender.com/coordinates/change/'+ coordinatesId + '?lat=' + newLat + '&lng=' + newLng;
         }
     </script>
 
@@ -322,7 +322,7 @@
         console.log('Script loaded');
         $(document).ready(function() {
             $('#get').click(function() {
-                callEndpoint('http://localhost:8080/sunInfo/country/', $('input[name="get-countryName"]').val(), null, null, $('input[name="get-date"]').val());
+                callEndpoint('https://javalab3-1.onrender.com/sunInfo/country/', $('input[name="get-countryName"]').val(), null, null, $('input[name="get-date"]').val());
             });
 
             $('#country-okay').click(function(){
@@ -334,7 +334,7 @@
             })
 
             $('#post').click(function() {
-                callEndpoint('http://localhost:8080/sunInfo/country/add', $('input[name="post-countryName"]').val(), $('input[name="post-lat"]').val(), $('input[name="post-lng"]').val(), null);
+                callEndpoint('https://javalab3-1.onrender.com/sunInfo/country/add', $('input[name="post-countryName"]').val(), $('input[name="post-lat"]').val(), $('input[name="post-lng"]').val(), null);
             });
 
 
