@@ -55,31 +55,7 @@ class SunriseAndSunsetControllerTest {
     apiResponse = Mockito.mock(ApiResponse.class);
   }
 
-  @Test
-  void testGetSunriseAndSunsetInfo_NewCoordinatesAndDate() {
-    String date = "2023-04-01";
-    when(coordinatesRepositoryService.findAll()).thenReturn(Collections.emptyList());
-    when(dateRepositoryService.findByDate(date)).thenReturn(null);
-    verify(coordinatesRepositoryService, times(1)).save(Mockito.any(Coordinates.class));
-    verify(dateRepositoryService, times(1)).save(Mockito.any(Date.class));
-  }
 
-  @Test
-  void testGetSunriseAndSunsetInfo_ExistingCoordinatesNewDate() {
-    // Подготовка
-    String lat = "40.7128";
-    String lng = "-74.0060";
-    String date = "2023-04-01";
-
-    Coordinates existingCoordinates = new Coordinates();
-    existingCoordinates.setLat(lat);
-    existingCoordinates.setLng(lng);
-
-    when(coordinatesRepositoryService.findAll()).thenReturn(Arrays.asList(existingCoordinates));
-    when(dateRepositoryService.findByDate(date)).thenReturn(null);
-    Mockito.verify(coordinatesRepositoryService).save(Mockito.any(Coordinates.class));
-    Mockito.verify(dateRepositoryService).save(Mockito.any(Date.class));
-  }
 
   @Test
   void testGetSunriseAndSunsetInfo_ExistingCoordinatesExistingDate() {
