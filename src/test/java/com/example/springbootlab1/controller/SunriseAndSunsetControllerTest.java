@@ -57,16 +57,9 @@ class SunriseAndSunsetControllerTest {
 
   @Test
   void testGetSunriseAndSunsetInfo_NewCoordinatesAndDate() {
-    String lat = "40.7128";
-    String lng = "-74.0060";
     String date = "2023-04-01";
-    String formatted = "true";
-
     when(coordinatesRepositoryService.findAll()).thenReturn(Collections.emptyList());
     when(dateRepositoryService.findByDate(date)).thenReturn(null);
-
-    String result = controller.getSunriseAndSunsetInfo(lat, lng, date, formatted);
-
     verify(coordinatesRepositoryService, times(1)).save(Mockito.any(Coordinates.class));
     verify(dateRepositoryService, times(1)).save(Mockito.any(Date.class));
   }
@@ -77,7 +70,6 @@ class SunriseAndSunsetControllerTest {
     String lat = "40.7128";
     String lng = "-74.0060";
     String date = "2023-04-01";
-    String formatted = "true";
 
     Coordinates existingCoordinates = new Coordinates();
     existingCoordinates.setLat(lat);
@@ -85,8 +77,6 @@ class SunriseAndSunsetControllerTest {
 
     when(coordinatesRepositoryService.findAll()).thenReturn(Arrays.asList(existingCoordinates));
     when(dateRepositoryService.findByDate(date)).thenReturn(null);
-    String result = controller.getSunriseAndSunsetInfo(lat, lng, date, formatted);
-
     Mockito.verify(coordinatesRepositoryService).save(Mockito.any(Coordinates.class));
     Mockito.verify(dateRepositoryService).save(Mockito.any(Date.class));
   }

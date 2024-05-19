@@ -261,7 +261,6 @@ public class SunriseAndSunsetController {
     logger.info("Processing get request \"/allCountriesInfo\"");
     RequestsCounterService.increment();
     logger.info(AMOUNT_OF_REQUESTS, RequestsCounterService.getCount());
-    logger.info(countryName);
     model.addAttribute("changeType", changeType);
     model.addAttribute("countryName", countryName);
     model.addAttribute("coordinatesId", coordinatesId);

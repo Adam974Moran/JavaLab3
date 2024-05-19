@@ -34,15 +34,6 @@ class ApiResponseCacheTest {
     assertEquals(value, apiResponseCache.getFromCache(key));
   }
 
-  @Test
-  void testGetFromCache() {
-    String key = "testKey";
-    String value = "testValue";
-
-    apiResponseCache.addToCache(key, value);
-
-    assertEquals(value, apiResponseCache.getFromCache(key));
-  }
 
   @Test
   void testGetFromCache_NotFound() {
