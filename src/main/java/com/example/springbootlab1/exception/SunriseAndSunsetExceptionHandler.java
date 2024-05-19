@@ -45,19 +45,6 @@ public class SunriseAndSunsetExceptionHandler {
         .body(new Message(errorMessage, e.getMessage()));
   }
 
-  /**
-   * No resource found exception response entity.
-   *
-   * @param e the e
-   * @return the response entity
-   */
-//  @ExceptionHandler({NoResourceFoundException.class})
-//  public ResponseEntity<Message> noResourceFoundException(NoResourceFoundException e) {
-//    String errorMessage = "ERROR 404: No Resource Found";
-//    logger.error(errorMessage);
-//    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//        .body(new Message(errorMessage, e.getMessage()));
-//  }
 
   /**
    * Handle method not supported exception response entity.

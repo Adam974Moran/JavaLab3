@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,7 +211,7 @@ public class SunriseAndSunsetController {
   @GetMapping("/sunInfo/country/")
   public String getCoordinatesByCountry(@RequestParam(value = "countryName", defaultValue = "null") String countryName,
                                         @RequestParam(value = "date", defaultValue = "null")
-                                        String date, Model model) {
+                                        String date, Model model) throws JSONException {
     if(Objects.equals(countryName, "null")){
       model.addAttribute("type", ERROR);
       model.addAttribute(MESSAGE, "Parameter \"countryName\" is obligatory");
@@ -236,17 +237,12 @@ public class SunriseAndSunsetController {
         return w.getExceptionMessage();
       }
 
-      try {
-        JSONObject jsonObject =
-            new JSONObject(JsonFormatter.getFormattedJsonKeys(ApiResponse.getJsonInString(url)));
-        Results newResults = new Results();
-        newResults.setSunrise(jsonObject.getString("sunrise"));
-        newResults.setSunset(jsonObject.getString("sunset"));
-        resultsList.add(newResults);
-
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      JSONObject jsonObject =
+          new JSONObject(JsonFormatter.getFormattedJsonKeys(ApiResponse.getJsonInString(url)));
+      Results newResults = new Results();
+      newResults.setSunrise(jsonObject.getString("sunrise"));
+      newResults.setSunset(jsonObject.getString("sunset"));
+      resultsList.add(newResults);
 
     }
     model.addAttribute("results", resultsList);
