@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 18
+        uses: actions/setup-java@v2
+        with:
+          java-version: '18'
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Deploy to production
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.srv-cp48man79t8c73ec7pmg }}
+          api-key: ${{ secrets.rnd_LFLq5cM6XcaIhLpSlsGvv0PyUBwu }}
+          wait-for-success: true
