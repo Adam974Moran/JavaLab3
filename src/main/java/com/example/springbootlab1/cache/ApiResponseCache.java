@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 @EnableScheduling
 public class ApiResponseCache {
 
-  private static final int MAX_AMOUNT_OF_ELEMENTS = 3;
+  private static final int MAX_AMOUNT_OF_ELEMENTS = 10;
   private static final Logger logger = LoggerFactory.getLogger(ApiResponseCache.class);
 
 
