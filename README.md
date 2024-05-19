@@ -1,3 +1,4 @@
+![example workflow](https://github.com/Adam974Moran/JavaLab3/actions/workflows/ci.yml/badge.svg)
 <h1>Sunset and Sunrise</h1>
 <hr>
 <br>
